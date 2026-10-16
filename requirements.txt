@@ -1,0 +1,37 @@
+langgraph>=0.2
+langchain-core>=0.3
+
+langchain-ollama>=0.2
+
+ddgs>=9.0
+
+python-dotenv>=1.0
+pydantic>=2.7
+pydantic-settings>=2.2
+
+PyYAML>=6.0
+
+# Phase 2: database
+sqlalchemy>=2.0
+alembic>=1.13
+psycopg[binary]>=3.2
+langgraph-checkpoint-postgres>=2.0
+
+# Phase 2: API and logging
+fastapi>=0.115
+uvicorn>=0.30
+loguru>=0.7
+
+# Phase 2: cache and rate limiting
+redis>=5
+
+# Phase 2: HTTP clients (knowledge adapters)
+httpx>=0.27
+
+# Phase 2: background job queue
+rq>=2.0
+
+# Phase 2: observability
+opentelemetry-api>=1.25
+opentelemetry-sdk>=1.25
+prometheus-client>=0.20

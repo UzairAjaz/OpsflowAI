@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: checkout-api-analysis
+  namespace: default
+spec:
+  metrics:
+  - name: error-rate
+    interval: 1m
+    successCondition: result[0] <= 0.05
+    failureLimit: 1
+    provider:
+      prometheus:
+        address: http://prometheus.monitoring:9090
+        query: sum(rate(http_requests_total{app="checkout-api",code=~"5.."}[1m]))
+          / sum(rate(http_requests_total{app="checkout-api"}[1m]))
+  - name: p95-latency
+    interval: 1m
+    successCondition: result[0] <= 500
+    failureLimit: 1
+    provider:
+      prometheus:
+        address: http://prometheus.monitoring:9090
+        query: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{app="checkout-api"}[5m]))
+          by (le))

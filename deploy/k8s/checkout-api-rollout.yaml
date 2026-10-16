@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: checkout-api
+  namespace: default
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: checkout-api
+  template:
+    metadata:
+      labels:
+        app: checkout-api
+    spec:
+      containers:
+      - name: checkout-api
+        image: ghcr.io/acme/checkout-api:1.2.3
+  strategy:
+    canary:
+      steps:
+      - setWeight: 10
+      - pause:
+          duration: 10m
+      - setWeight: 25
+      - pause:
+          duration: 10m
+      - setWeight: 50
+      - pause:
+          duration: 10m
+      - setWeight: 100
+      analysis:
+        templates:
+        - templateName: checkout-api-analysis

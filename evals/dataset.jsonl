@@ -1,0 +1,6 @@
+{"error_log": "container exited with code 137 (OOM Killed), memory limit 512MiB", "expected_remediation_id": "increase_memory_limit", "tenant_id": "acme", "service": "checkout-api", "error_class": "OOMKilled"}
+{"error_log": "No space left on device, /dev/sda1 is 100% full", "expected_remediation_id": "inspect_disk", "tenant_id": "acme", "service": "checkout-api", "error_class": "DiskFull"}
+{"error_log": "connection refused by upstream service after deploy", "expected_remediation_id": "restart_container", "tenant_id": "acme", "service": "payments-api", "error_class": "ConnectionRefused"}
+{"error_log": "high memory usage, container repeatedly oom killed", "expected_remediation_id": "increase_memory_limit", "tenant_id": "beta", "service": "search-api", "error_class": "HighMemory"}
+{"error_log": "disk usage 100% reported by node exporter, no space", "expected_remediation_id": "inspect_disk", "tenant_id": "beta", "service": "search-api", "error_class": "DiskFull"}
+{"error_log": "container crashed and exited unexpectedly", "expected_remediation_id": "restart_container", "tenant_id": "beta", "service": "search-api", "error_class": "ContainerCrash"}

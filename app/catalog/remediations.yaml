@@ -1,0 +1,81 @@
+allowlists:
+  allowed_services:
+    - retriva-backend
+    - nginx
+    - postgres
+    - redis
+
+remediations:
+  - id: inspect_disk
+    description: Show filesystem disk usage (read-only)
+    risk: safe
+    reversible: true
+    command_template: ["df", "-h"]
+    params: {}
+
+  - id: inspect_container
+    description: Inspect a container's state / OOM status (read-only)
+    risk: safe
+    reversible: true
+    command_template: ["docker", "inspect", "{container_name}"]
+    params:
+      container_name:
+        type: string
+        required: true
+
+  - id: restart_container
+    description: Restart a docker container
+    risk: medium
+    reversible: true
+    command_template: ["docker", "restart", "{container_name}"]
+    rollback_template: ["docker", "restart", "{container_name}"]
+    params:
+      container_name:
+        type: string
+        required: true
+
+  - id: increase_memory_limit
+    description: Raise a container's memory limit
+    risk: medium
+    reversible: true
+    command_template: ["docker", "update", "--memory", "{new_memory_limit}", "{container_name}"]
+    validation_commands:
+      - ["docker", "inspect", "{container_name}"]
+    rollback_template: ["docker", "update", "--memory", "512Mi", "{container_name}"]
+    params:
+      container_name:
+        type: string
+        required: true
+      new_memory_limit:
+        type: string
+        required: true
+        pattern: "^[0-9]+[kKmMgG]?[iI]?[bB]?$"
+
+  - id: restart_service
+    description: Restart a systemd service (allowlisted only)
+    risk: medium
+    reversible: true
+    command_template: ["systemctl", "restart", "{service_name}"]
+    rollback_template: ["systemctl", "restart", "{service_name}"]
+    params:
+      service_name:
+        type: string
+        required: true
+        enum_from: allowed_services
+
+  - id: prune_images
+    description: Remove unused docker images
+    risk: medium
+    reversible: false
+    command_template: ["docker", "image", "prune", "-f"]
+    params: {}
+
+  - id: delete_volume
+    description: Delete a docker volume (DESTRUCTIVE, irreversible)
+    risk: high
+    reversible: false
+    command_template: ["docker", "volume", "rm", "{volume_name}"]
+    params:
+      volume_name:
+        type: string
+        required: true
