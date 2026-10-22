@@ -1,11 +1,3 @@
-"""Historical incident knowledge source (PostgreSQL).
-
-Operational memory: for a given tenant, service, and error class, find the most
-recent successful remediation within a lookback window and report its historical
-success rate. Registered into the knowledge fallback chain and also exposed via
-the history_search tool.
-"""
-
 from __future__ import annotations
 
 from collections import defaultdict
@@ -18,14 +10,12 @@ from sqlalchemy.orm import Session
 from app.state import ResearchResult
 from db.models import FixOutcome, Incident
 
-
 class PriorFix(BaseModel):
     remediation_id: str
     params: dict[str, str] = Field(default_factory=dict)
     success_rate: float
     occurrences: int
     last_applied_at: datetime | None = None
-
 
 def find_prior_fix(
     session: Session,
@@ -86,9 +76,7 @@ def find_prior_fix(
         last_applied_at=best["last_success"],
     )
 
-
 class HistoryKnowledgeBase:
-    """Knowledge source backed by past fix outcomes in PostgreSQL."""
 
     def retrieve(
         self,

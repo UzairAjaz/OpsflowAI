@@ -1,9 +1,3 @@
-"""P2-05 check: webhook HMAC verification.
-
-Exercises POST /api/v1/webhooks/alert with a valid signature, a tampered body,
-a missing signature, and invalid JSON (valid signature).
-"""
-
 from __future__ import annotations
 
 import json
@@ -22,7 +16,6 @@ ALERT = {
     "severity_hint": "critical",
     "raw_log": "container exited with code 137",
 }
-
 
 def main() -> None:
     body = json.dumps(ALERT).encode("utf-8")
@@ -64,7 +57,6 @@ def main() -> None:
 
     get_queue().empty()
     print("[ok] P2-05 -- webhook accepts signed alerts and rejects tampered/unsigned ones.")
-
 
 if __name__ == "__main__":
     main()

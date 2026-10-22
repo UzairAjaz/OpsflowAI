@@ -1,38 +1,38 @@
-import requests
-import hmac
 import hashlib
+import hmac
 import json
+import os
 
-# Apne .env file se secret copy karein (ya jo aapne set kiya hai)
-WEBHOOK_SECRET = "dev-secret-change-me" 
-WEBHOOK_URL = "http://localhost:8000/api/v1/webhooks/alert"
+import requests
 
-# 1. Fake Alert Payload (Jaise Docker crash hua)
+WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "dev-secret-change-me")
+WEBHOOK_URL = os.getenv(
+    "OPSFLOW_WEBHOOK_URL", "http://127.0.0.1:8000/api/v1/webhooks/alert"
+)
+TENANT_ID = os.getenv("OPSFLOW_TENANT_ID", "acme")
+
 payload = {
     "source": "cloudwatch",
     "service": "payment-api",
+    "tenant_id": TENANT_ID,
     "error_class": "OOMKilled",
     "severity_hint": "critical",
     "raw_log": "Container payment-api-1 exited with code 137 (OOMKilled)",
-    "fingerprint": "svc:payment-api|err:OOMKilled"
+    "fingerprint": "svc:payment-api|err:OOMKilled",
 }
 
-raw_body = json.dumps(payload).encode('utf-8')
+raw_body = json.dumps(payload).encode("utf-8")
 
-# 2. HMAC Signature Generate karna
 signature = hmac.new(
-    WEBHOOK_SECRET.encode('utf-8'), 
-    raw_body, 
-    hashlib.sha256
+    WEBHOOK_SECRET.encode("utf-8"), raw_body, hashlib.sha256
 ).hexdigest()
 
 headers = {
     "Content-Type": "application/json",
-    "X-Signature": f"sha256={signature}"
+    "X-Signature": f"sha256={signature}",
 }
 
-# 3. Alert Bhejna
-print("🚀 Sending fake Docker crash alert...")
-response = requests.post(WEBHOOK_URL, data=raw_body, headers=headers)
+print(f"Sending test alert to {WEBHOOK_URL}")
+response = requests.post(WEBHOOK_URL, data=raw_body, headers=headers, timeout=15)
 
-print(f"✅ API Response: {response.status_code} - {response.json()}")
+print(f"API response: {response.status_code} - {response.json()}")

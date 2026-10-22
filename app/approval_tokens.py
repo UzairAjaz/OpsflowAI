@@ -1,5 +1,3 @@
-"""HMAC-signed, time-limited approval tokens (for email approve/reject links)."""
-
 from __future__ import annotations
 
 import base64
@@ -10,14 +8,11 @@ import time
 
 from app.config import settings
 
-
 def _b64e(data: bytes) -> str:
     return base64.urlsafe_b64encode(data).decode().rstrip("=")
 
-
 def _b64d(data: str) -> bytes:
     return base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))
-
 
 def sign_approval_token(
     thread_id: str, decision: str, ttl_minutes: int | None = None
@@ -29,7 +24,6 @@ def sign_approval_token(
         settings.approval_token_secret.encode(), raw, hashlib.sha256
     ).digest()
     return f"{_b64e(raw)}.{_b64e(signature)}"
-
 
 def verify_approval_token(token: str) -> dict | None:
     try:

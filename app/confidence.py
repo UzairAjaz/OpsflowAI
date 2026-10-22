@@ -1,16 +1,3 @@
-"""Rubric-based confidence scoring.
-
-Confidence is derived from evidence, not from a self-reported number:
-
-- kb_match (highest weight): internal knowledge matched (managed KB / connectors).
-- history_success: the historical success rate of the same signature.
-- source_agreement: how many independent sources agree (kb / web / history).
-- catalog_match: the proposed remediation id exists in the vetted catalog.
-- critic_score: the adversarial critic's assessment.
-
-The result is 0-100 with a per-signal breakdown (points, summing to the score).
-"""
-
 from __future__ import annotations
 
 from pydantic import BaseModel
@@ -28,11 +15,9 @@ WEIGHTS: dict[str, int] = {
     "critic_score": 20,
 }
 
-
 class ConfidenceResult(BaseModel):
     score: int
     breakdown: dict[str, float]
-
 
 def score_confidence(state: OpsFlowState) -> ConfidenceResult:
     research = state.get("research", [])

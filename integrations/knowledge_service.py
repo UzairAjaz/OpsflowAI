@@ -1,24 +1,10 @@
-"""Knowledge service: multi-tenant retrieval with a graceful fallback chain.
-
-Priority order:
-    1. Managed Tenant KB (namespace-isolated vectors)
-    2. Live External Connectors (Confluence / ServiceNow)
-    3. Web Search (marked Low Confidence)
-
-The first source that returns results wins. If an earlier source is empty or
-errors, retrieval degrades gracefully instead of failing. Web results are marked
-`is_low_confidence` so downstream confidence scoring can account for them.
-"""
-
 from __future__ import annotations
 
 from app.config import settings
 from app.state import ResearchResult
 from app.tools.knowledge import KnowledgeBase, KnowledgeResponse
 
-
 class WebKnowledgeBase:
-    """Web fallback built on the existing DuckDuckGo tool; results are low confidence."""
 
     def retrieve(
         self,
@@ -44,7 +30,6 @@ class WebKnowledgeBase:
             for item in raw
             if item.get("snippet")
         ]
-
 
 class KnowledgeService:
     def __init__(
@@ -85,7 +70,6 @@ class KnowledgeService:
             tried += 1
         return KnowledgeResponse(results=[], source_used=None, fallback_used=False)
 
-
 def _kb_sources() -> list[tuple[str, KnowledgeBase]]:
     sources: list[tuple[str, KnowledgeBase]] = []
 
@@ -123,18 +107,12 @@ def _kb_sources() -> list[tuple[str, KnowledgeBase]]:
 
     return sources
 
-
 def get_internal_knowledge_service() -> KnowledgeService:
-    """Managed knowledge sources only (tenant KB + live connectors).
 
-    Used by the parallel KB research agent so it does not duplicate the separate
-    history and web agents.
-    """
     return KnowledgeService(_kb_sources(), fallback_enabled=True)
 
-
 def get_knowledge_service() -> KnowledgeService:
-    """Full fallback chain: KB -> connectors -> history -> web."""
+
     sources = _kb_sources()
 
     from integrations.history import HistoryKnowledgeBase

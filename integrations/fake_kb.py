@@ -1,13 +1,6 @@
-"""Deterministic in-memory knowledge base for tests and local development.
-
-Documents are keyed by tenant id, which makes tenant isolation easy to verify:
-a query for one tenant never returns another tenant's documents.
-"""
-
 from __future__ import annotations
 
 from app.state import ResearchResult
-
 
 class FakeKnowledgeBase:
     def __init__(self, docs: dict[str, list[ResearchResult]] | None = None) -> None:

@@ -1,11 +1,3 @@
-"""Parallel research agents (Map-Reduce fan-out).
-
-plan_research builds the query; dispatch_research fans out to three research
-agents using LangGraph `Send`; each agent appends its results to the shared
-`research` list (operator.add reducer). The proposal node then runs once on the
-merged results.
-"""
-
 from __future__ import annotations
 
 from langgraph.types import Send
@@ -16,11 +8,9 @@ from app.tools.knowledge import KnowledgeBase
 
 _KB_SERVICE: KnowledgeBase | None = None
 
-
 def set_kb_service(service: KnowledgeBase | None) -> None:
     global _KB_SERVICE
     _KB_SERVICE = service
-
 
 def _kb_service() -> KnowledgeBase:
     global _KB_SERVICE
@@ -29,7 +19,6 @@ def _kb_service() -> KnowledgeBase:
 
         _KB_SERVICE = get_internal_knowledge_service()
     return _KB_SERVICE
-
 
 def _build_query(state: OpsFlowState) -> str:
     parts = [
@@ -49,11 +38,9 @@ def _build_query(state: OpsFlowState) -> str:
 
     return " ".join(words[:20]) or "server error"
 
-
 def plan_research(state: OpsFlowState) -> dict:
     query = state.get("refined_query") or _build_query(state)
     return {"research_query": query}
-
 
 def dispatch_research(state: OpsFlowState):
     return [
@@ -61,7 +48,6 @@ def dispatch_research(state: OpsFlowState):
         Send("research_web", state),
         Send("research_history", state),
     ]
-
 
 def research_kb(state: OpsFlowState) -> dict:
     query = state.get("research_query") or _build_query(state)
@@ -82,7 +68,6 @@ def research_kb(state: OpsFlowState) -> dict:
         "research": results,
         "audit": [AuditEvent(actor="agent", action="research", detail=detail)],
     }
-
 
 def research_web(state: OpsFlowState) -> dict:
     from app.tools.web_search import web_search
@@ -109,7 +94,6 @@ def research_web(state: OpsFlowState) -> dict:
         "research": results,
         "audit": [AuditEvent(actor="agent", action="research", detail=detail)],
     }
-
 
 def research_history(state: OpsFlowState) -> dict:
     service = state.get("service")

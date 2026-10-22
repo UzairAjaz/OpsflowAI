@@ -1,16 +1,7 @@
-"""Canary node: progressive production rollout with automatic rollback.
-
-After the fix is applied in production (the executor), this node rolls it out
-progressively (10% -> 100%) with metric gates. If a stage breaches the error
-rate or latency threshold, the rollout is abandoned and the incident is marked
-`rolled_back`.
-"""
-
 from __future__ import annotations
 
 from app.config import settings
 from app.state import AuditEvent, OpsFlowState
-
 
 def run_canary(state: OpsFlowState) -> dict:
     from integrations.canary import (

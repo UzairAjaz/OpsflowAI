@@ -1,13 +1,3 @@
-"""P2-11 check: historical incidents tool.
-
-Verifies:
-- a recurring signature surfaces the last successful fix with its success rate,
-- history is tenant-isolated,
-- outcomes outside the lookback window are excluded,
-- the history knowledge source and the history_search tool work,
-- history registers into the knowledge fallback chain.
-"""
-
 from __future__ import annotations
 
 import time
@@ -23,7 +13,6 @@ from db.session import SessionLocal
 from integrations.fake_kb import FakeKnowledgeBase
 from integrations.history import HistoryKnowledgeBase, find_prior_fix
 from integrations.knowledge_service import KnowledgeService
-
 
 def _seed(
     tenant: str,
@@ -62,7 +51,6 @@ def _seed(
             )
         session.commit()
 
-
 def _cleanup(service: str) -> None:
     with SessionLocal() as session:
         incidents = (
@@ -75,7 +63,6 @@ def _cleanup(service: str) -> None:
             session.delete(incident)
         session.commit()
 
-
 class StubWeb:
     def retrieve(self, *, tenant_id, query, max_results=5, service=None, error_class=None):
         return [
@@ -83,7 +70,6 @@ class StubWeb:
                 source="web", title="web", url=None, snippet="s", score=0.2, is_low_confidence=True
             )
         ]
-
 
 def main() -> None:
     service = f"hist-check-{int(time.time())}"
@@ -160,7 +146,6 @@ def main() -> None:
     finally:
         for name in (service, other, old):
             _cleanup(name)
-
 
 if __name__ == "__main__":
     main()

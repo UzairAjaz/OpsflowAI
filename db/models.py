@@ -1,12 +1,3 @@
-"""SQLAlchemy models for the OpsFlow AI Phase 2 database.
-
-Tables:
-- processed_alerts: webhook idempotency and alert deduplication.
-- incidents: one row per detected incident (thread_id maps to the checkpointer).
-- execution_logs: immutable audit trail of every execution attempt.
-- fix_outcomes: post-fix verification results used for learning.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -28,9 +19,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from db.base import Base
 
-
 class ProcessedAlert(Base):
-    """Idempotency record for inbound alerts."""
 
     __tablename__ = "processed_alerts"
 
@@ -53,9 +42,7 @@ class ProcessedAlert(Base):
         UUID(as_uuid=True), ForeignKey("incidents.incident_id"), nullable=True
     )
 
-
 class Incident(Base):
-    """One detected incident; thread_id links to the LangGraph checkpointer."""
 
     __tablename__ = "incidents"
 
@@ -83,9 +70,7 @@ class Incident(Base):
         Index("ix_incidents_status", "status"),
     )
 
-
 class ExecutionLog(Base):
-    """Immutable audit record of one execution attempt."""
 
     __tablename__ = "execution_logs"
 
@@ -110,9 +95,7 @@ class ExecutionLog(Base):
 
     __table_args__ = (Index("ix_execution_logs_incident_id", "incident_id"),)
 
-
 class FixOutcome(Base):
-    """Post-fix verification result used to calibrate future decisions."""
 
     __tablename__ = "fix_outcomes"
 

@@ -1,16 +1,9 @@
-"""history_search tool: find the last successful fix for a recurring signature.
-
-Complements kb_search by surfacing operational memory: what fixed this tenant's
-same service + error class before, and how reliably.
-"""
-
 from __future__ import annotations
 
 from langchain_core.tools import tool
 
 from db.session import SessionLocal
 from integrations.history import find_prior_fix
-
 
 @tool(
     "history_search",

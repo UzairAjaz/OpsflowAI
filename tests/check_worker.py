@@ -1,12 +1,3 @@
-"""P2-08 check: incident creation and queue worker.
-
-Verifies:
-- a new alert can be enqueued exactly once (deterministic job id),
-- a worker (burst mode) processes the job and creates an incident,
-- the graph runs for the incident,
-- re-delivering the job does not create a second incident.
-"""
-
 from __future__ import annotations
 
 import time
@@ -20,16 +11,14 @@ from app.state import OpsFlowState
 from db.models import Incident, ProcessedAlert
 from db.session import SessionLocal, engine
 from ingestion.service import ingest_payload
-from worker.graph_runner import run_incident  # noqa: F401  (kept for clarity)
+from worker.graph_runner import run_incident
 from worker.queue import enqueue_incident, get_connection, get_queue
 
 STUB_RUNS: list[str] = []
 
-
 def _stub_node(state: OpsFlowState) -> dict:
     STUB_RUNS.append(str(state.get("thread_id")))
     return {"status": "completed"}
-
 
 def build_stub_graph():
     builder = StateGraph(OpsFlowState)
@@ -37,7 +26,6 @@ def build_stub_graph():
     builder.add_edge(START, "stub")
     builder.add_edge("stub", END)
     return builder.compile(checkpointer=make_checkpointer("memory"))
-
 
 def _cleanup(service: str) -> None:
     get_queue().empty()
@@ -61,7 +49,6 @@ def _cleanup(service: str) -> None:
                         text(f"DELETE FROM {table} WHERE thread_id = :tid"),
                         {"tid": thread_id},
                     )
-
 
 def main() -> None:
     service = f"worker-check-{int(time.time())}"
@@ -120,7 +107,6 @@ def main() -> None:
         print("[ok] P2-08 -- incident creation and queue worker working.")
     finally:
         _cleanup(service)
-
 
 if __name__ == "__main__":
     main()

@@ -1,14 +1,3 @@
-"""Canary deployment: progressive rollout with metric gates and auto-rollback.
-
-The controller is provider-neutral. `SimulatedCanaryController` runs the
-promotion logic locally (used in tests and without a cluster).
-`ArgoCanaryController` is the adapter for a real Kubernetes/Argo Rollouts
-cluster.
-
-Metrics come from a `MetricsProvider` (static for tests, Prometheus when
-configured).
-"""
-
 from __future__ import annotations
 
 from typing import Protocol
@@ -18,12 +7,10 @@ from pydantic import BaseModel
 
 from app.config import settings
 
-
 class MetricsSnapshot(BaseModel):
     error_rate: float = 0.0
     p95_ms: float = 0.0
     http_5xx: int = 0
-
 
 class StageResult(BaseModel):
     percentage: int
@@ -32,16 +19,13 @@ class StageResult(BaseModel):
     promoted: bool
     reason: str = ""
 
-
 class CanaryOutcome(BaseModel):
     status: str
     stages: list[StageResult]
     rollback_reason: str | None = None
 
-
 class MetricsProvider(Protocol):
     def snapshot(self, *, service: str, percentage: int) -> MetricsSnapshot: ...
-
 
 class StaticMetricsProvider:
     def __init__(
@@ -60,7 +44,6 @@ class StaticMetricsProvider:
         if self._fail_at is not None and percentage >= self._fail_at:
             return MetricsSnapshot(error_rate=self._fail_error_rate, p95_ms=self._p95_ms)
         return MetricsSnapshot(error_rate=self._error_rate, p95_ms=self._p95_ms)
-
 
 class PrometheusMetricsProvider:
     def __init__(self, url: str) -> None:
@@ -84,7 +67,6 @@ class PrometheusMetricsProvider:
         except Exception:
             return None
 
-
 class CanaryController(Protocol):
     name: str
 
@@ -97,7 +79,6 @@ class CanaryController(Protocol):
         p95_threshold_ms: int,
         metrics: MetricsProvider,
     ) -> CanaryOutcome: ...
-
 
 class SimulatedCanaryController:
     name = "simulated"
@@ -140,9 +121,7 @@ class SimulatedCanaryController:
                 )
         return CanaryOutcome(status="promoted", stages=stages)
 
-
 class ArgoCanaryController:
-    """Adapter for a real Argo Rollouts cluster (requires kubectl + a cluster)."""
 
     name = "argo"
 
@@ -159,8 +138,7 @@ class ArgoCanaryController:
                 stages=[],
                 rollback_reason="kubectl not available; cannot run Argo rollout",
             )
-        # A real implementation would apply the Rollout and watch status; here we
-        # fall back to the metric-gated simulation using the current manifests.
+
         return SimulatedCanaryController().run(
             service=service,
             steps=steps,
@@ -169,20 +147,16 @@ class ArgoCanaryController:
             metrics=metrics,
         )
 
-
 _CONTROLLER_OVERRIDE: CanaryController | None = None
 _METRICS_OVERRIDE: MetricsProvider | None = None
-
 
 def set_canary_controller(controller: CanaryController | None) -> None:
     global _CONTROLLER_OVERRIDE
     _CONTROLLER_OVERRIDE = controller
 
-
 def set_metrics_provider(provider: MetricsProvider | None) -> None:
     global _METRICS_OVERRIDE
     _METRICS_OVERRIDE = provider
-
 
 def get_canary_controller() -> CanaryController:
     if _CONTROLLER_OVERRIDE is not None:
@@ -191,14 +165,12 @@ def get_canary_controller() -> CanaryController:
         return ArgoCanaryController(namespace=settings.argo_namespace)
     return SimulatedCanaryController()
 
-
 def get_metrics_provider() -> MetricsProvider:
     if _METRICS_OVERRIDE is not None:
         return _METRICS_OVERRIDE
     if settings.prometheus_url:
         return PrometheusMetricsProvider(settings.prometheus_url)
     return StaticMetricsProvider()
-
 
 def parse_canary_steps() -> list[int]:
     return [int(item) for item in settings.canary_steps.split(",") if item.strip()]

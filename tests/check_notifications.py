@@ -1,11 +1,3 @@
-"""P2-23..P2-25 check: notifications and escalation.
-
-- Slack Block Kit message includes approve/reject buttons,
-- notification dispatch records via a FakeNotifier,
-- email approval tokens are embedded in the links,
-- escalation policy fires at the right levels and advances the incident.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -25,7 +17,6 @@ from db.session import SessionLocal
 
 SERVICE = "notify-check"
 
-
 def _cleanup() -> None:
     with SessionLocal() as session:
         incidents = (
@@ -34,7 +25,6 @@ def _cleanup() -> None:
         for incident in incidents:
             session.delete(incident)
         session.commit()
-
 
 def main() -> None:
     summary = {
@@ -106,7 +96,6 @@ def main() -> None:
         _cleanup()
 
     print("[ok] P2-23..P2-25 -- notifications and escalation working.")
-
 
 if __name__ == "__main__":
     main()

@@ -1,19 +1,3 @@
-"""P2-09 check: Week 1 integration test.
-
-Proves the full Week 1 pipeline in a single command:
-
-    signed alert -> dedupe -> incident -> graph -> approval pause
-                 -> process restart -> resume
-
-A deterministic graph is used (no LLM) so the test is fast and stable. The graph
-pauses at the real approval node using the PostgreSQL checkpointer, and a second
-process resumes the same thread.
-
-Usage:
-    python -m tests.check_week1                 # run the integration test
-    python -m tests.check_week1 resume <thread>  # resume phase (internal)
-"""
-
 from __future__ import annotations
 
 import json
@@ -38,7 +22,6 @@ from db.models import Incident, ProcessedAlert
 from db.session import SessionLocal, engine
 from worker.queue import get_connection, get_queue
 
-
 def _preflight(state: OpsFlowState) -> dict:
     return {
         "diagnosis": "OOM killed",
@@ -54,7 +37,6 @@ def _preflight(state: OpsFlowState) -> dict:
         "confidence": 85,
         "audit": [AuditEvent(actor="agent", action="analyze", detail="preflight")],
     }
-
 
 def build_week1_graph():
     builder = StateGraph(OpsFlowState)
@@ -75,7 +57,6 @@ def build_week1_graph():
     )
     return builder.compile(checkpointer=make_checkpointer("postgres"))
 
-
 def _resume(thread_id: str) -> None:
     graph = build_week1_graph()
     config = {"configurable": {"thread_id": thread_id}}
@@ -89,7 +70,6 @@ def _resume(thread_id: str) -> None:
     print("resume: status =", result.get("status"))
     if result.get("status") not in ("approved", "completed"):
         sys.exit(1)
-
 
 def _cleanup(service: str) -> None:
     get_queue().empty()
@@ -111,7 +91,6 @@ def _cleanup(service: str) -> None:
                         text(f"DELETE FROM {table} WHERE thread_id = :tid"), {"tid": thread_id}
                     )
 
-
 def _post(client: TestClient, payload: dict):
     body = json.dumps(payload).encode("utf-8")
     return client.post(
@@ -122,7 +101,6 @@ def _post(client: TestClient, payload: dict):
             "X-Signature": sign_payload(settings.webhook_secret, body),
         },
     )
-
 
 def main() -> None:
     args = sys.argv[1:]
@@ -182,7 +160,6 @@ def main() -> None:
         print("     signed alert -> dedupe -> incident -> graph -> approval pause -> resume")
     finally:
         _cleanup(service)
-
 
 if __name__ == "__main__":
     main()

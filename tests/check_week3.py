@@ -1,14 +1,3 @@
-"""P2-21 check: Week 3 integration test.
-
-Proves the Week 3 pipeline in a single command:
-
-    seed -> risk -> sandbox -> approval (interrupt) -> executor
-
-Deterministic (fake sandbox): no LLM. Verifies sandbox validation, the rollback
-plan, the human approval after validation, production execution, and the audit
-trail.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -27,7 +16,6 @@ from db.models import ExecutionLog
 from db.session import SessionLocal
 from integrations.sandbox import FakeSandbox, set_sandbox
 
-
 def _seed(state: OpsFlowState) -> dict:
     return {
         "diagnosis": "OOM killed",
@@ -42,7 +30,6 @@ def _seed(state: OpsFlowState) -> dict:
         "critic_score": 85,
         "audit": [AuditEvent(actor="agent", action="analyze", detail="seed")],
     }
-
 
 def build_graph():
     builder = StateGraph(OpsFlowState)
@@ -70,7 +57,6 @@ def build_graph():
     )
     builder.add_edge("executor", END)
     return builder.compile(checkpointer=make_checkpointer("memory"))
-
 
 def main() -> None:
     set_sandbox(FakeSandbox(default_exit=0))
@@ -135,7 +121,6 @@ def main() -> None:
                 )
             )
             session.commit()
-
 
 if __name__ == "__main__":
     main()

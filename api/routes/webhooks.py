@@ -1,11 +1,3 @@
-"""Alert ingestion webhook.
-
-Receives alerts from monitoring systems (CloudWatch, Prometheus, Grafana,
-Datadog). Every request must carry a valid HMAC-SHA256 signature. Valid alerts
-are normalized, severity-labelled, rate-limited, and de-duplicated. When an
-alert creates a new group, an incident-processing job is enqueued.
-"""
-
 from __future__ import annotations
 
 import json
@@ -21,7 +13,6 @@ from observability.logging import get_logger
 from worker.queue import enqueue_incident
 
 router = APIRouter(prefix="/api/v1/webhooks", tags=["webhooks"])
-
 
 @router.post("/alert", status_code=202)
 async def receive_alert(request: Request) -> dict:

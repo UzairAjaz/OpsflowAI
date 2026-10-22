@@ -1,10 +1,3 @@
-"""Scoring node: compute rubric confidence and decide the next step.
-
-Runs after the critic (which provides critic_score) and before routing. It also
-owns the loop cap: when confidence stays below the threshold after the maximum
-number of iterations, the incident is escalated instead of being guessed at.
-"""
-
 from __future__ import annotations
 
 from app.confidence import score_confidence
@@ -12,7 +5,6 @@ from app.config import settings
 from app.state import AuditEvent, OpsFlowState
 
 AUTOMATION_THRESHOLD = 80
-
 
 def score(state: OpsFlowState) -> dict:
     result = score_confidence(state)
@@ -37,7 +29,6 @@ def score(state: OpsFlowState) -> dict:
             )
         ],
     }
-
 
 def route_after_scoring(state: OpsFlowState) -> str:
     if state.get("status") == "escalated":

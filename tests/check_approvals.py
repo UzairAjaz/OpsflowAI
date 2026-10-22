@@ -1,10 +1,3 @@
-"""P2-22 check: approval service + resume endpoint.
-
-- signed approval tokens (email links) verify and expire,
-- a paused incident resumes exactly once via the approval service,
-- the HTTP approval endpoint enforces auth and reports no-pending.
-"""
-
 from __future__ import annotations
 
 import time
@@ -23,14 +16,12 @@ from app.nodes.approval import approval, route_after_approval
 from app.state import OpsFlowState, Remediation, new_incident
 from db.session import engine
 
-
 def _min_graph():
     builder = StateGraph(OpsFlowState)
     builder.add_node("approval", approval)
     builder.add_edge(START, "approval")
     builder.add_conditional_edges("approval", route_after_approval, {"execute": END, "reject": END})
     return builder.compile(checkpointer=make_checkpointer("postgres"))
-
 
 def _paused_thread(graph, thread_id: str):
     state = new_incident(
@@ -48,12 +39,10 @@ def _paused_thread(graph, thread_id: str):
     result = graph.invoke(state, {"configurable": {"thread_id": thread_id}})
     assert "__interrupt__" in result
 
-
 def _purge(thread_id: str) -> None:
     with engine.begin() as connection:
         for table in ("checkpoint_writes", "checkpoint_blobs", "checkpoints"):
             connection.execute(text(f"DELETE FROM {table} WHERE thread_id = :tid"), {"tid": thread_id})
-
 
 def main() -> None:
     token = sign_approval_token("inc-1", "approve")
@@ -94,7 +83,6 @@ def main() -> None:
             settings.tenant_api_keys = original
 
     print("[ok] P2-22 -- approval service and resume endpoint working.")
-
 
 if __name__ == "__main__":
     main()

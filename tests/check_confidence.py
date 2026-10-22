@@ -1,16 +1,9 @@
-"""P2-13 check: rubric-based confidence scoring.
-
-Verifies the rubric signals, the per-signal breakdown, and the scoring node's
-flags (manual_review, automation_eligible) and escalation on the loop cap.
-"""
-
 from __future__ import annotations
 
 from app.confidence import WEIGHTS, score_confidence
 from app.config import settings
 from app.nodes.scoring import route_after_scoring, score
 from app.state import Remediation, ResearchResult, new_incident
-
 
 def _full_state() -> dict:
     state = new_incident("x")
@@ -24,7 +17,6 @@ def _full_state() -> dict:
     )
     state["critic_score"] = 90
     return state
-
 
 def main() -> None:
     full = score_confidence(_full_state())
@@ -91,7 +83,6 @@ def main() -> None:
     )
 
     print("[ok] P2-13 -- rubric confidence scoring working.")
-
 
 if __name__ == "__main__":
     main()

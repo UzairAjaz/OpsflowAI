@@ -1,10 +1,3 @@
-"""kb_search tool: tenant-scoped knowledge retrieval with graceful fallback.
-
-Returns ResearchResult-shaped dictionaries. The underlying service is
-provider-neutral and can be injected with `set_knowledge_base` (used by tests
-and by the composition root).
-"""
-
 from __future__ import annotations
 
 from langchain_core.tools import tool
@@ -13,11 +6,9 @@ from app.tools.knowledge import KnowledgeBase
 
 _SERVICE: KnowledgeBase | None = None
 
-
 def set_knowledge_base(service: KnowledgeBase | None) -> None:
     global _SERVICE
     _SERVICE = service
-
 
 def get_knowledge_base() -> KnowledgeBase:
     global _SERVICE
@@ -26,7 +17,6 @@ def get_knowledge_base() -> KnowledgeBase:
 
         _SERVICE = get_knowledge_service()
     return _SERVICE
-
 
 @tool(
     "kb_search",

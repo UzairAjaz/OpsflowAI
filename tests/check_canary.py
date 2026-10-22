@@ -1,10 +1,3 @@
-"""P2-27..P2-29 check: canary manifests, metric gates, progressive rollout.
-
-- Argo Rollout + AnalysisTemplate manifests are generated and valid YAML,
-- the simulated controller promotes a healthy rollout and rolls back a failing one,
-- the canary node records stages and status.
-"""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -22,10 +15,8 @@ from integrations.canary import (
     set_metrics_provider,
 )
 
-
 def _state(service: str = "checkout-api") -> dict:
     return new_incident("oom", tenant_id="acme", service=service, error_class="OOMKilled")
-
 
 def main() -> None:
     steps = parse_canary_steps()
@@ -79,7 +70,6 @@ def main() -> None:
     print("manifests -> Rollout + AnalysisTemplate (error-rate, p95-latency)")
 
     print("[ok] P2-27..P2-29 -- canary manifests, gates, and rollback working.")
-
 
 if __name__ == "__main__":
     main()

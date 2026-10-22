@@ -1,9 +1,3 @@
-"""P2-03 check: FastAPI skeleton and structured logging.
-
-Runs the app in-process with Starlette's TestClient and verifies that the
-health endpoints return 200 and that requests produce JSON log lines.
-"""
-
 from __future__ import annotations
 
 import json
@@ -11,7 +5,6 @@ import json
 from fastapi.testclient import TestClient
 
 from api.main import app
-
 
 def main() -> None:
     with TestClient(app) as client:
@@ -27,7 +20,6 @@ def main() -> None:
         assert ready.status_code == 200, ready.text
         print("readyz    :", ready.json())
 
-    # Emit one structured log line and confirm it is valid JSON.
     from observability.logging import get_logger
 
     line = json.dumps({"probe": "ok"})
@@ -36,7 +28,6 @@ def main() -> None:
     assert parsed["probe"] == "ok"
 
     print("[ok] P2-03 -- API health endpoints and structured logging working.")
-
 
 if __name__ == "__main__":
     main()

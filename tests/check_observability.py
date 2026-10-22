@@ -1,5 +1,3 @@
-"""P2-31..P2-33 check: tracing, Prometheus metrics, structured logging."""
-
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
@@ -8,7 +6,6 @@ from api.main import app
 from app.config import settings
 from observability import metrics
 from observability.tracing import configure_tracing, get_recorded_spans, span
-
 
 def main() -> None:
     settings.otel_enabled = True
@@ -40,7 +37,6 @@ def main() -> None:
     print("metrics   -> /metrics exposes opsflow_* series")
 
     print("[ok] P2-31..P2-33 -- tracing, metrics, structured logs working.")
-
 
 if __name__ == "__main__":
     main()

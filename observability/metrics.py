@@ -1,10 +1,3 @@
-"""Prometheus metrics.
-
-Counters and histograms track the platform's key indicators (incidents,
-auto-resolution, approvals, sandbox failures, canary rollbacks, MTTD/MTTR,
-fix success rate, approval latency). Exposed at `/metrics`.
-"""
-
 from __future__ import annotations
 
 from prometheus_client import Counter, Gauge, Histogram
@@ -30,12 +23,10 @@ approval_latency_seconds = Histogram(
 )
 fix_success_rate = Gauge("opsflow_fix_success_rate", "Rolling fix success rate (0-1)")
 
-
 def record_incident(*, tenant: str, severity: str, mttd: float = 0.0) -> None:
     incident_total.labels(tenant=tenant, severity=severity).inc()
     if mttd:
         mttd_seconds.observe(mttd)
-
 
 def record_resolution(*, auto: bool, mttr: float = 0.0) -> None:
     if auto:
@@ -45,10 +36,8 @@ def record_resolution(*, auto: bool, mttr: float = 0.0) -> None:
     if mttr:
         mttr_seconds.observe(mttr)
 
-
 def record_sandbox_failure() -> None:
     sandbox_failures_total.inc()
-
 
 def record_canary_rollback() -> None:
     canary_rollback_total.inc()

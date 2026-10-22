@@ -1,9 +1,6 @@
-"""P2-36 check: eval harness (accuracy + false-safe rate)."""
-
 from __future__ import annotations
 
 from evals.run_eval import run
-
 
 def main() -> None:
     outcome = run()
@@ -14,7 +11,6 @@ def main() -> None:
         f"false_safe_rate={outcome['false_safe_rate']} "
         f"({outcome['correct']}/{outcome['total']})"
     )
-
 
 if __name__ == "__main__":
     main()

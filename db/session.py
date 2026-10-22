@@ -1,9 +1,3 @@
-"""Database engine and session management.
-
-The URL comes from settings.database_url, which uses the psycopg v3 driver
-(postgresql+psycopg). Alembic and background workers use the synchronous engine.
-"""
-
 from __future__ import annotations
 
 from collections.abc import Iterator
@@ -22,9 +16,8 @@ SessionLocal = sessionmaker(
     class_=Session,
 )
 
-
 def get_session() -> Iterator[Session]:
-    """FastAPI dependency that yields a database session."""
+
     session = SessionLocal()
     try:
         yield session

@@ -1,9 +1,3 @@
-"""P2-16..P2-19 check: sandbox execution, validation, rollback, audit.
-
-Uses a fake sandbox for deterministic node behavior and a real Docker sandbox
-for a read-only command to prove the isolation mechanism.
-"""
-
 from __future__ import annotations
 
 from sqlalchemy import delete, select
@@ -16,7 +10,6 @@ from integrations.sandbox import DockerSandbox, FakeSandbox, set_sandbox
 
 REMEDIATIONS = ["inspect_disk", "increase_memory_limit", "delete_volume"]
 
-
 def _state(remediation_id: str, params: dict, severity: str = "high") -> dict:
     state = new_incident(
         "oom", tenant_id="acme", service="checkout-api", error_class="OOMKilled"
@@ -27,12 +20,10 @@ def _state(remediation_id: str, params: dict, severity: str = "high") -> dict:
     state["severity"] = severity
     return state
 
-
 def _cleanup_logs() -> None:
     with SessionLocal() as session:
         session.execute(delete(ExecutionLog).where(ExecutionLog.remediation_id.in_(REMEDIATIONS)))
         session.commit()
-
 
 def main() -> None:
     _cleanup_logs()
@@ -97,7 +88,6 @@ def main() -> None:
     set_sandbox(None)
     _cleanup_logs()
     print("[ok] P2-16..P2-19 -- sandbox execution, validation, rollback, audit working.")
-
 
 if __name__ == "__main__":
     main()

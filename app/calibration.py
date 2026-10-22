@@ -1,10 +1,3 @@
-"""Confidence calibration from observed fix outcomes.
-
-Groups recorded outcomes by confidence bucket and reports the observed success
-rate per bucket. If fixes that scored high historically failed often, a more
-conservative automation threshold is suggested.
-"""
-
 from __future__ import annotations
 
 from sqlalchemy import select
@@ -14,14 +7,12 @@ from db.session import SessionLocal
 
 BUCKETS = ("low (0-59)", "medium (60-79)", "high (80-100)")
 
-
 def _bucket(confidence: int) -> str:
     if confidence < 60:
         return BUCKETS[0]
     if confidence < 80:
         return BUCKETS[1]
     return BUCKETS[2]
-
 
 def calibration_report() -> dict:
     with SessionLocal() as session:

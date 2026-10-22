@@ -1,9 +1,3 @@
-"""Post-incident report generator (Markdown).
-
-Builds a timeline, root cause/fix, outcome, and lessons-learned section from the
-incident, its execution logs, and its fix outcomes.
-"""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -12,7 +6,6 @@ from sqlalchemy import select
 
 from db.models import ExecutionLog, FixOutcome, Incident
 from db.session import SessionLocal
-
 
 def generate_incident_report(thread_id: str) -> str:
     with SessionLocal() as session:
@@ -90,7 +83,6 @@ def generate_incident_report(thread_id: str) -> str:
         ]
     )
     return "\n".join(lines)
-
 
 def write_report(thread_id: str, out_dir: str = "reports") -> str:
     content = generate_incident_report(thread_id)

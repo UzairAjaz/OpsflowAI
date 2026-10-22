@@ -1,13 +1,3 @@
-"""P2-07 check: rate limiting and severity classification.
-
-Verifies:
-- the sliding-window limiter allows 50 per service per window and blocks the 51st,
-- limits are isolated per service,
-- severity rules classify critical / warning / info,
-- the endpoint returns 429 for a 51st new incident but coalesces same-group alerts,
-- the classified severity is persisted.
-"""
-
 from __future__ import annotations
 
 import json
@@ -26,10 +16,8 @@ from ingestion.ratelimit import get_rate_limiter
 from ingestion.severity import classify_severity_rules
 from worker.queue import get_queue
 
-
 def _redis() -> redis.Redis:
     return redis.Redis.from_url(settings.redis_url, decode_responses=True)
-
 
 def _post(client: TestClient, payload: dict, secret: str):
     body = json.dumps(payload).encode("utf-8")
@@ -42,13 +30,11 @@ def _post(client: TestClient, payload: dict, secret: str):
         },
     )
 
-
 def _clear(service: str) -> None:
     _redis().delete(f"ratelimit:alerts:{service}")
     with SessionLocal() as session:
         session.execute(delete(ProcessedAlert).where(ProcessedAlert.service == service))
         session.commit()
-
 
 def main() -> None:
     limiter = get_rate_limiter()
@@ -134,7 +120,6 @@ def main() -> None:
     _clear(service_b)
     get_queue().empty()
     print("[ok] P2-07 -- rate limiting and severity classification working.")
-
 
 if __name__ == "__main__":
     main()

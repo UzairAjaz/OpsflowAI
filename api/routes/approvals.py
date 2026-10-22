@@ -1,11 +1,3 @@
-"""Approval endpoints: resume a paused incident from an external channel.
-
-- `GET  /email?token=...`       — signed email link
-- `POST /slack/interactions`    — Slack interactive buttons (signature verified)
-- `GET  /{thread_id}`           — pending status (API key)
-- `POST /{thread_id}`           — approve/reject (API key)
-"""
-
 from __future__ import annotations
 
 import json
@@ -22,11 +14,9 @@ from app.config import settings
 
 router = APIRouter(prefix="/api/v1/approvals", tags=["approvals"])
 
-
 class ApprovalDecision(BaseModel):
     approved: bool
     approver: str = "api"
-
 
 @router.get("/email")
 async def email_decision(token: str) -> dict:
@@ -42,7 +32,6 @@ async def email_decision(token: str) -> dict:
     if result["status"] == "no_pending":
         raise HTTPException(status_code=409, detail="no pending approval")
     return result
-
 
 @router.post("/slack/interactions")
 async def slack_interactions(request: Request) -> dict:
@@ -74,7 +63,6 @@ async def slack_interactions(request: Request) -> dict:
     )
     return result
 
-
 @router.get("/{thread_id}")
 async def pending(thread_id: str, x_api_key: str | None = Header(default=None)) -> dict:
     if authenticate_api_key(settings.tenant_api_keys, x_api_key) is None:
@@ -83,7 +71,6 @@ async def pending(thread_id: str, x_api_key: str | None = Header(default=None)) 
         "thread_id": thread_id,
         "pending": await run_in_threadpool(is_pending, thread_id=thread_id),
     }
-
 
 @router.post("/{thread_id}")
 async def decide(

@@ -1,14 +1,3 @@
-"""P2-15 check: Week 2 integration test.
-
-Proves the Week 2 pipeline in a single command:
-
-    seed -> plan_research -[Send]-> (kb | web | history) -> propose -> scoring
-
-Deterministic (fake KB, fake web, seeded history, seeded critic score): no LLM,
-no network. Verifies parallel multi-source research, tenant scoping, the
-history-aware proposal, and rubric confidence.
-"""
-
 from __future__ import annotations
 
 import time
@@ -35,11 +24,9 @@ from db.session import SessionLocal
 from integrations.fake_kb import FakeKnowledgeBase
 from integrations.knowledge_service import KnowledgeService
 
-
 class FakeWebTool:
     def invoke(self, payload):
         return [{"title": "Web hit", "url": "http://web", "snippet": "web snippet"}]
-
 
 def _seed(state: OpsFlowState) -> dict:
     return {
@@ -50,7 +37,6 @@ def _seed(state: OpsFlowState) -> dict:
         "critic_score": 85,
         "audit": [AuditEvent(actor="agent", action="analyze", detail="seed")],
     }
-
 
 def build_graph():
     builder = StateGraph(OpsFlowState)
@@ -74,7 +60,6 @@ def build_graph():
     builder.add_edge("propose", "scoring")
     builder.add_edge("scoring", END)
     return builder.compile(checkpointer=make_checkpointer("memory"))
-
 
 def _seed_history(tenant: str, service: str, error_class: str, success_rate: float) -> None:
     with SessionLocal() as session:
@@ -106,7 +91,6 @@ def _seed_history(tenant: str, service: str, error_class: str, success_rate: flo
             )
         session.commit()
 
-
 def _cleanup(service: str) -> None:
     with SessionLocal() as session:
         incidents = (
@@ -118,7 +102,6 @@ def _cleanup(service: str) -> None:
         for incident in incidents:
             session.delete(incident)
         session.commit()
-
 
 def main() -> None:
     service = f"week2-{int(time.time())}"
@@ -173,7 +156,6 @@ def main() -> None:
         assert result["manual_review"] is False
         print("confidence->", result["confidence"], result["confidence_breakdown"])
 
-        # tenant isolation: a different tenant gets no internal knowledge
         other = research_kb(
             {"tenant_id": "beta", "research_query": "oom", "service": service, "error_class": "OOMKilled"}
         )
@@ -188,7 +170,6 @@ def main() -> None:
     finally:
         set_kb_service(None)
         _cleanup(service)
-
 
 if __name__ == "__main__":
     main()

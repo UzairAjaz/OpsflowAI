@@ -1,13 +1,3 @@
-"""P2-06 check: alert idempotency and deduplication.
-
-Verifies:
-- a first alert is reported as "new",
-- an exact replay is reported as "duplicate" and increments the count,
-- a burst of alerts for the same service/error class within the window is
-  reported as "merged" (no additional new incidents),
-- normalization rejects payloads missing required fields.
-"""
-
 from __future__ import annotations
 
 from sqlalchemy import delete, select
@@ -20,7 +10,6 @@ from ingestion.service import process_alert
 SERVICE = "ingest-check-svc"
 ERROR_CLASS = "OOMKilled"
 
-
 def _payload(n: int) -> dict:
     return {
         "source": "cloudwatch",
@@ -30,12 +19,10 @@ def _payload(n: int) -> dict:
         "raw_log": f"event {n}",
     }
 
-
 def _cleanup() -> None:
     with SessionLocal() as session:
         session.execute(delete(ProcessedAlert).where(ProcessedAlert.service == SERVICE))
         session.commit()
-
 
 def main() -> None:
     _cleanup()
@@ -74,7 +61,6 @@ def main() -> None:
         print("[ok] P2-06 -- idempotency and deduplication working.")
     finally:
         _cleanup()
-
 
 if __name__ == "__main__":
     main()

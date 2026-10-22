@@ -1,18 +1,7 @@
-"""Step 6 check: routing after rubric scoring (conditional edge).
-
-Chalao:
-    python -m scripts.check_router
-
-`route_after_scoring` is a pure function (state -> next node name), so it can be
-tested without the LLM. Routing is based on the rubric confidence, and the loop
-cap is enforced by the scoring node (status = escalated).
-"""
-
 from __future__ import annotations
 
 from app.config import settings
 from app.nodes.scoring import route_after_scoring
-
 
 def main() -> None:
     cases: list[tuple[dict, str]] = [
@@ -32,7 +21,6 @@ def main() -> None:
         assert got == expected, f"router wrong: {got} != {expected}"
 
     print("\n[ok] P2-13 -- router routes on rubric confidence.")
-
 
 if __name__ == "__main__":
     main()

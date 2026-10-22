@@ -1,16 +1,8 @@
-"""Generate Argo Rollouts manifests for progressive delivery.
-
-Produces a `Rollout` (canary strategy with weighted steps + pauses) and an
-`AnalysisTemplate` (Prometheus gates on error rate and p95 latency). Written to
-`deploy/k8s/` by `write_manifests`.
-"""
-
 from __future__ import annotations
 
 from pathlib import Path
 
 import yaml
-
 
 def build_rollout_manifest(
     *, name: str, image: str, steps: list[int], namespace: str = "default"
@@ -42,7 +34,6 @@ def build_rollout_manifest(
             },
         },
     }
-
 
 def build_analysis_template(
     *,
@@ -91,7 +82,6 @@ def build_analysis_template(
             ]
         },
     }
-
 
 def write_manifests(
     *,

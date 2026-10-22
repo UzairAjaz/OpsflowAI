@@ -1,10 +1,3 @@
-"""P2-12 check: parallel research (Send map-reduce).
-
-Runs a minimal graph that fans out to three research agents and merges their
-results. KB, web, and history are faked/seeded so the test is deterministic and
-does not depend on the LLM or the network.
-"""
-
 from __future__ import annotations
 
 import time
@@ -29,15 +22,12 @@ from db.session import SessionLocal
 from integrations.fake_kb import FakeKnowledgeBase
 from integrations.knowledge_service import KnowledgeService
 
-
 class FakeWebTool:
     def invoke(self, payload):
         return [{"title": "Web hit", "url": "http://web", "snippet": "web snippet"}]
 
-
 def _collect(state: OpsFlowState) -> dict:
     return {}
-
 
 def build_graph():
     builder = StateGraph(OpsFlowState)
@@ -57,7 +47,6 @@ def build_graph():
     builder.add_edge("research_history", "collect")
     builder.add_edge("collect", END)
     return builder.compile(checkpointer=make_checkpointer("memory"))
-
 
 def _seed_history(tenant: str, service: str, error_class: str) -> None:
     with SessionLocal() as session:
@@ -87,7 +76,6 @@ def _seed_history(tenant: str, service: str, error_class: str) -> None:
         )
         session.commit()
 
-
 def _cleanup(service: str) -> None:
     with SessionLocal() as session:
         incidents = (
@@ -99,7 +87,6 @@ def _cleanup(service: str) -> None:
         for incident in incidents:
             session.delete(incident)
         session.commit()
-
 
 def main() -> None:
     service = f"par-check-{int(time.time())}"
@@ -164,7 +151,6 @@ def main() -> None:
     finally:
         set_kb_service(None)
         _cleanup(service)
-
 
 if __name__ == "__main__":
     main()

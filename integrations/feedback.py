@@ -1,10 +1,3 @@
-"""Feedback loop: verify applied fixes and record outcomes.
-
-Scans incidents that have matured past the verification horizon, determines
-whether the fix was stable (real deployments would health-check the service),
-and writes a `fix_outcomes` row used for learning and confidence calibration.
-"""
-
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -17,7 +10,6 @@ from db.session import SessionLocal
 
 SUCCESS_STATUSES = ("completed", "approved")
 OBSERVED_STATUSES = ("completed", "approved", "rolled_back")
-
 
 def process_feedback(*, now: datetime | None = None, horizon_hours: int | None = None) -> list[dict]:
     now = now or datetime.now(timezone.utc)

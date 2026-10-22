@@ -1,21 +1,8 @@
-"""Managed multi-tenant vector knowledge base adapter.
-
-Contract:
-    POST {base_url}/v1/search
-    Authorization: Bearer <api_key>        (when configured)
-    body:     {"tenant_id": ..., "namespace": ..., "query": ..., "top_k": ...}
-    response: {"results": [{"title", "url", "snippet", "score"}]}
-
-Every query is scoped to a namespace derived from the tenant id, so one
-client's data is never returned for another client.
-"""
-
 from __future__ import annotations
 
 import httpx
 
 from app.state import ResearchResult
-
 
 class TenantVectorKnowledgeBase:
     def __init__(

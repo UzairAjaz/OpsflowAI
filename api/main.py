@@ -1,9 +1,3 @@
-"""OpsFlow AI HTTP API (Phase 2 skeleton).
-
-Exposes liveness and readiness endpoints plus request logging. Alert webhooks,
-approval callbacks, and metrics are added in later steps.
-"""
-
 from __future__ import annotations
 
 import time
@@ -23,20 +17,17 @@ configure_logging()
 
 log = get_logger(stage="api")
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     log.info("OpsFlow API starting")
     yield
     log.info("OpsFlow API stopped")
 
-
 app = FastAPI(title="OpsFlow AI API", version="0.1.0", lifespan=lifespan)
 
 app.include_router(webhooks_router)
 app.include_router(approvals_router)
 app.include_router(metrics_router)
-
 
 @app.middleware("http")
 async def request_logging_middleware(request, call_next):
@@ -52,21 +43,22 @@ async def request_logging_middleware(request, call_next):
     ).info("request completed")
     return response
 
-
 @app.get("/")
 def root() -> dict:
     return {"service": "opsflow-api", "version": app.version, "docs": "/docs"}
 
-
 @app.get("/healthz")
 def healthz() -> dict:
-    """Liveness probe: the process is running."""
+
     return {"status": "ok"}
 
+@app.get("/health")
+def health() -> dict:
+    return healthz()
 
 @app.get("/readyz")
 def readyz() -> dict:
-    """Readiness probe: dependencies (database) are reachable."""
+
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
@@ -74,7 +66,6 @@ def readyz() -> dict:
         get_logger(stage="readiness").exception("database not ready")
         raise HTTPException(status_code=503, detail="database unavailable")
     return {"status": "ready", "database": "ok"}
-
 
 if __name__ == "__main__":
     import uvicorn

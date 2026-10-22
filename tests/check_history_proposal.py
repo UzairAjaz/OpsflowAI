@@ -1,20 +1,12 @@
-"""P2-14 check: history-aware proposal.
-
-When a proven fix exists with a high success rate, the proposer should prefer it
-directly (no LLM). Weak, unknown, or invalid prior fixes should not be preferred.
-"""
-
 from __future__ import annotations
 
 from app.nodes.researcher import _CATALOG, _prior_proposal, propose
 from app.state import new_incident
 
-
 def _state_with_prior(prior: dict) -> dict:
     state = new_incident("oom", tenant_id="acme", service="svc", error_class="OOMKilled")
     state["prior_fix"] = prior
     return state
-
 
 def main() -> None:
     strong = _state_with_prior(
@@ -65,7 +57,6 @@ def main() -> None:
 
     assert _CATALOG.get("increase_memory_limit") is not None
     print("[ok] P2-14 -- history-aware proposal working.")
-
 
 if __name__ == "__main__":
     main()

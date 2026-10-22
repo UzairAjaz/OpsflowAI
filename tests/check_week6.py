@@ -1,9 +1,3 @@
-"""P2-37 check: Week 6 integration (observability + learning capstone).
-
-Proves tracing, metrics, reports, the feedback loop, and calibration work
-together, and that the metrics endpoint is scrapeable.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -25,7 +19,6 @@ from observability.tracing import configure_tracing, get_recorded_spans, span
 
 SERVICE = "week6-check"
 
-
 def _cleanup() -> None:
     with SessionLocal() as session:
         incidents = (
@@ -38,7 +31,6 @@ def _cleanup() -> None:
         for incident in incidents:
             session.delete(incident)
         session.commit()
-
 
 def main() -> None:
     settings.otel_enabled = True
@@ -105,7 +97,6 @@ def main() -> None:
         _cleanup()
         for path in Path("reports").glob("week6-*.md"):
             path.unlink()
-
 
 if __name__ == "__main__":
     main()

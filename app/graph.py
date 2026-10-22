@@ -6,7 +6,6 @@ from langgraph.graph import END, START, StateGraph
 from app.checkpointer import make_checkpointer
 from app.nodes.analyzer import analyze
 from app.nodes.approval import approval, route_after_approval
-from app.nodes.canary import run_canary
 from app.nodes.critic import critique
 from app.nodes.executor import execute
 from app.nodes.intake import intake
@@ -22,7 +21,6 @@ from app.nodes.risk import classify, route_after_risk
 from app.nodes.sandbox import route_after_sandbox, run_sandbox
 from app.nodes.scoring import route_after_scoring, score
 from app.state import OpsFlowState
-
 
 def build_graph(checkpointer: BaseCheckpointSaver | None = None):
 
@@ -41,7 +39,6 @@ def build_graph(checkpointer: BaseCheckpointSaver | None = None):
     builder.add_node("sandbox", run_sandbox)
     builder.add_node("approval", approval)
     builder.add_node("executor", execute)
-    builder.add_node("canary", run_canary)
 
     builder.add_edge(START, "intake")
     builder.add_edge("intake", "analyzer")
@@ -84,10 +81,8 @@ def build_graph(checkpointer: BaseCheckpointSaver | None = None):
         {"execute": "executor", "reject": END},
     )
 
-    builder.add_edge("executor", "canary")
-    builder.add_edge("canary", END)
+    builder.add_edge("executor", END)
 
     return builder.compile(checkpointer=checkpointer)
-
 
 graph = build_graph(make_checkpointer())

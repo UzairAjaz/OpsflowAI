@@ -1,12 +1,3 @@
-"""Run all OpsFlow checks and print a summary.
-
-Usage:
-    python -m tests.run_all
-
-Runs every Phase 1, Week 1, and Week 2 check in sequence and prints a PASS/FAIL
-summary. Exits non-zero if any check fails.
-"""
-
 from __future__ import annotations
 
 import subprocess
@@ -45,7 +36,6 @@ TESTS = [
     "tests.check_week6",
 ]
 
-
 def main() -> None:
     results: list[tuple[str, bool, float]] = []
 
@@ -69,7 +59,6 @@ def main() -> None:
     print(f"Summary: {passed}/{total} passed")
     if passed != total:
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

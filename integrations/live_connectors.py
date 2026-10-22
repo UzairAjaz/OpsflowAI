@@ -1,22 +1,8 @@
-"""Live external connector adapter (Confluence / ServiceNow).
-
-A generic HTTP adapter for enterprise clients that require zero-data-retention:
-their knowledge is queried live and never stored. Returns an empty list when the
-connector is not configured or returns nothing, so the knowledge service can
-fall through to the next source.
-
-Contract:
-    POST {base_url}/v1/search
-    body:     {"tenant_id": ..., "query": ..., "top_k": ...}
-    response: {"results": [{"title", "url", "snippet", "score"}]}
-"""
-
 from __future__ import annotations
 
 import httpx
 
 from app.state import ResearchResult
-
 
 class LiveConnectorKnowledgeBase:
     def __init__(self, base_url: str, api_key: str = "", timeout: float = 5.0) -> None:

@@ -1,11 +1,3 @@
-"""OpenTelemetry tracing.
-
-Disabled by default so the platform runs without a collector. When
-`OTEL_ENABLED=true`, spans are recorded with an exporter selected by
-`OTEL_EXPORTER` (memory | console | otlp). The in-memory exporter records spans
-for inspection and tests.
-"""
-
 from __future__ import annotations
 
 from contextlib import contextmanager
@@ -14,7 +6,6 @@ from app.config import settings
 
 _CONFIGURED = False
 _MEMORY = None
-
 
 def _build_exporter():
     if settings.otel_exporter == "console":
@@ -33,7 +24,6 @@ def _build_exporter():
     global _MEMORY
     _MEMORY = InMemorySpanExporter()
     return _MEMORY
-
 
 def configure_tracing(service_name: str = "opsflow-ai") -> bool:
     global _CONFIGURED
@@ -58,12 +48,10 @@ def configure_tracing(service_name: str = "opsflow-ai") -> bool:
         _CONFIGURED = False
         return False
 
-
 def get_recorded_spans() -> list:
     if _MEMORY is None:
         return []
     return list(_MEMORY.get_finished_spans())
-
 
 @contextmanager
 def span(name: str, **attributes):

@@ -1,11 +1,3 @@
-"""Proposer node: turn merged research into a candidate remediation.
-
-History-aware: when the history agent found a proven fix for the same tenant,
-service, and error class with a high success rate, that fix is proposed directly
-(id and params taken from the catalog-validated stored outcome). Otherwise the
-LLM proposes, with the prior fix included as guidance.
-"""
-
 from __future__ import annotations
 
 from app.catalog import load_catalog
@@ -38,9 +30,8 @@ Rules:
   unchanged.
 """
 
-
 def _prior_proposal(state: OpsFlowState) -> Remediation | None:
-    """Return the proven fix directly when it is strong and catalog-valid."""
+
     prior = state.get("prior_fix")
     if not prior:
         return None
@@ -65,7 +56,6 @@ def _prior_proposal(state: OpsFlowState) -> Remediation | None:
     if not validate_proposal(_CATALOG, candidate).ok:
         return None
     return candidate
-
 
 def _propose(state: OpsFlowState, results: list[ResearchResult]) -> Remediation:
     research_text = "\n".join(f"- {r.title}: {r.snippet[:300]}" for r in results[:5])
@@ -115,7 +105,6 @@ def _propose(state: OpsFlowState, results: list[ResearchResult]) -> Remediation:
         ),
     ]
     return _proposer.invoke(messages)
-
 
 def propose(state: OpsFlowState) -> dict:
     prior = _prior_proposal(state)

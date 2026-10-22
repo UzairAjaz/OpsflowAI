@@ -1,18 +1,3 @@
-"""Alert normalization and identity.
-
-Converts a raw webhook payload into a normalized Alert. Two derived values are
-computed:
-
-- alerts_signature: idempotency key. A replay of the same event (same source
-  and event_id, or the same content when no event_id is provided) yields the
-  same signature and is not processed twice.
-- fingerprint: deduplication key (service + error class). Alerts sharing a
-  fingerprint within the dedupe window are merged into a single incident.
-
-The alert is also labelled with a severity, using the rules classifier. LLM
-refinement, when enabled, is applied by the ingestion service.
-"""
-
 from __future__ import annotations
 
 import hashlib
@@ -25,10 +10,8 @@ from ingestion.severity import classify_severity_rules
 
 SEVERITY_HINTS = {"critical", "warning", "info"}
 
-
 class AlertValidationError(ValueError):
-    """Raised when a payload cannot be normalized into an Alert."""
-
+    pass
 
 class Alert(BaseModel):
     source: str
@@ -43,13 +26,11 @@ class Alert(BaseModel):
     alerts_signature: str
     received_at: datetime
 
-
 def _required(payload: dict[str, Any], key: str) -> str:
     value = payload.get(key)
     if not isinstance(value, str) or not value.strip():
         raise AlertValidationError(f"missing or invalid '{key}'")
     return value.strip()
-
 
 def normalize_alert(payload: dict[str, Any]) -> Alert:
     source = _required(payload, "source")

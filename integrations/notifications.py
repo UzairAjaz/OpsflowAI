@@ -1,10 +1,3 @@
-"""Notification channels: Slack, Email, SMS (Twilio), plus console/fake.
-
-All channels are config-driven. When a channel is not configured it reports
-`ok=False` with a reason, so the platform still runs locally (console output) and
-tests inject a FakeNotifier.
-"""
-
 from __future__ import annotations
 
 from typing import Protocol
@@ -15,12 +8,10 @@ from pydantic import BaseModel
 from app.approval_tokens import sign_approval_token
 from app.config import settings
 
-
 class NotificationResult(BaseModel):
     channel: str
     ok: bool
     detail: str = ""
-
 
 class Notifier(Protocol):
     name: str
@@ -30,7 +21,6 @@ class Notifier(Protocol):
     def send_escalation(
         self, *, level: int, recipient: str, summary: dict
     ) -> NotificationResult: ...
-
 
 def build_slack_blocks(summary: dict) -> list[dict]:
     thread_id = summary.get("thread_id")
@@ -71,7 +61,6 @@ def build_slack_blocks(summary: dict) -> list[dict]:
         },
     ]
 
-
 class ConsoleNotifier:
     name = "console"
 
@@ -89,7 +78,6 @@ class ConsoleNotifier:
         )
         return NotificationResult(channel=self.name, ok=True, detail="printed to console")
 
-
 class FakeNotifier:
     name = "fake"
 
@@ -104,7 +92,6 @@ class FakeNotifier:
     def send_escalation(self, *, level: int, recipient: str, summary: dict) -> NotificationResult:
         self.escalations.append({"level": level, "recipient": recipient, "summary": summary})
         return NotificationResult(channel=self.name, ok=True, detail="recorded")
-
 
 class SlackNotifier:
     name = "slack"
@@ -125,7 +112,6 @@ class SlackNotifier:
 
     def send_escalation(self, *, level: int, recipient: str, summary: dict) -> NotificationResult:
         return self.send_approval_request(summary=summary)
-
 
 class EmailNotifier:
     name = "email"
@@ -162,7 +148,6 @@ class EmailNotifier:
 
     def send_escalation(self, *, level: int, recipient: str, summary: dict) -> NotificationResult:
         return self.send_approval_request(summary=summary)
-
 
 class SmsNotifier:
     name = "sms"
@@ -205,25 +190,20 @@ class SmsNotifier:
         except Exception as exc:
             return NotificationResult(channel=self.name, ok=False, detail=str(exc))
 
-
 _OVERRIDE: list[Notifier] | None = None
-
 
 def set_notifiers(notifiers: list[Notifier] | None) -> None:
     global _OVERRIDE
     _OVERRIDE = notifiers
-
 
 def get_notifiers() -> list[Notifier]:
     if _OVERRIDE is not None:
         return _OVERRIDE
     return [SlackNotifier(), EmailNotifier(), SmsNotifier(), ConsoleNotifier()]
 
-
 def dispatch_approval(summary: dict, notifiers: list[Notifier] | None = None) -> list[NotificationResult]:
     channels = notifiers if notifiers is not None else get_notifiers()
     return [channel.send_approval_request(summary=summary) for channel in channels]
-
 
 def dispatch_escalation(
     level: int, recipient: str, summary: dict, notifiers: list[Notifier] | None = None

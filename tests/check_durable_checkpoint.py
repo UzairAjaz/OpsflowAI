@@ -1,15 +1,3 @@
-"""P2-04 check: durable checkpoints with PostgresSaver.
-
-Phase 1 runs the graph until the approval interrupt and then exits.
-Phase 2 starts a brand-new Python process that resumes the same thread.
-The resume must complete exactly once.
-
-Usage:
-    python -m tests.check_durable_checkpoint              # runs both phases
-    python -m tests.check_durable_checkpoint start <id>    # phase 1 only
-    python -m tests.check_durable_checkpoint resume <id>   # phase 2 only
-"""
-
 from __future__ import annotations
 
 import subprocess
@@ -24,7 +12,6 @@ from app.checkpointer import make_checkpointer
 from app.nodes.approval import approval, route_after_approval
 from app.state import OpsFlowState, Remediation, new_incident
 
-
 def build_test_graph():
     builder = StateGraph(OpsFlowState)
     builder.add_node("approval", approval)
@@ -33,7 +20,6 @@ def build_test_graph():
         "approval", route_after_approval, {"execute": END, "reject": END}
     )
     return builder.compile(checkpointer=make_checkpointer("postgres"))
-
 
 def _seed(thread_id: str) -> dict:
     state = new_incident("durable checkpoint test", thread_id)
@@ -53,14 +39,12 @@ def _seed(thread_id: str) -> dict:
     state["requires_approval"] = True
     return state
 
-
 def phase_start(thread_id: str) -> None:
     graph = build_test_graph()
     config = {"configurable": {"thread_id": thread_id}}
     result = graph.invoke(_seed(thread_id), config)
     assert "__interrupt__" in result, "expected the graph to pause at approval"
     print("phase-1: paused at approval; thread =", thread_id)
-
 
 def phase_resume(thread_id: str) -> None:
     graph = build_test_graph()
@@ -82,7 +66,6 @@ def phase_resume(thread_id: str) -> None:
         len(approvals),
     )
 
-
 def _purge(thread_id: str) -> None:
     from db.session import engine
 
@@ -94,7 +77,6 @@ def _purge(thread_id: str) -> None:
                 )
     except Exception:
         pass
-
 
 def main() -> None:
     args = sys.argv[1:]
@@ -130,7 +112,6 @@ def main() -> None:
 
     _purge(thread_id)
     print("[ok] P2-04 -- durable checkpoints survive a process restart (resume exactly once).")
-
 
 if __name__ == "__main__":
     main()

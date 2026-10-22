@@ -1,14 +1,3 @@
-"""Checkpointer factory: in-memory (default) or PostgreSQL-backed.
-
-Backend selection comes from settings.checkpointer:
-
-- "memory"   -> InMemorySaver (Phase 1 behavior; state lost on restart)
-- "postgres" -> PostgresSaver (durable; approvals survive restarts)
-
-Custom Pydantic types stored in graph state are registered in an explicit
-serializer allowlist.
-"""
-
 from __future__ import annotations
 
 from langgraph.checkpoint.base import BaseCheckpointSaver
@@ -32,20 +21,15 @@ ALLOWED_CHECKPOINT_TYPES = [
     ResearchResult,
 ]
 
-
 def _serde() -> JsonPlusSerializer:
     return JsonPlusSerializer(allowed_msgpack_modules=ALLOWED_CHECKPOINT_TYPES)
 
-
 def _postgres_conn_string() -> str:
-    # SQLAlchemy URLs include the driver name (postgresql+psycopg://), while the
-    # raw psycopg driver expects postgresql://.
-    return settings.database_url.replace("postgresql+psycopg://", "postgresql://")
 
+    return settings.database_url.replace("postgresql+psycopg://", "postgresql://")
 
 def _make_memory() -> InMemorySaver:
     return InMemorySaver(serde=_serde())
-
 
 def _make_postgres() -> BaseCheckpointSaver:
     import psycopg
@@ -56,9 +40,8 @@ def _make_postgres() -> BaseCheckpointSaver:
     saver.setup()
     return saver
 
-
 def make_checkpointer(backend: str | None = None) -> BaseCheckpointSaver:
-    """Build a checkpointer for the requested backend (defaults to settings)."""
+
     selected = backend or settings.checkpointer
     if selected == "postgres":
         return _make_postgres()

@@ -1,13 +1,3 @@
-"""Sandbox runners: isolated execution of catalog commands.
-
-Backends:
-- docker: run the argv inside an ephemeral container (no network by default,
-  memory/CPU/pids limits, --rm). The container is discarded after the run, so any
-  state created inside it is implicitly reverted.
-- local: run the argv in a subprocess (development fallback, no isolation).
-- fake: deterministic results for tests.
-"""
-
 from __future__ import annotations
 
 import shutil
@@ -19,7 +9,6 @@ from pydantic import BaseModel
 
 from app.config import settings
 
-
 class CommandResult(BaseModel):
     command: list[str]
     exit_code: int
@@ -27,12 +16,10 @@ class CommandResult(BaseModel):
     stderr: str = ""
     duration_ms: int = 0
 
-
 class SandboxRunner(Protocol):
     name: str
 
     def run(self, argv: list[str], *, timeout: int | None = None) -> CommandResult: ...
-
 
 class LocalSandbox:
     name = "local"
@@ -55,7 +42,6 @@ class LocalSandbox:
             stderr=err[-4000:],
             duration_ms=int((time.perf_counter() - start) * 1000),
         )
-
 
 class DockerSandbox:
     name = "docker"
@@ -109,7 +95,6 @@ class DockerSandbox:
             duration_ms=int((time.perf_counter() - start) * 1000),
         )
 
-
 class FakeSandbox:
     name = "fake"
 
@@ -121,14 +106,11 @@ class FakeSandbox:
         code = self._exit_codes.get(argv[0], self._default) if argv else self._default
         return CommandResult(command=argv, exit_code=code, stdout=f"[fake] {' '.join(argv)}")
 
-
 _OVERRIDE: SandboxRunner | None = None
-
 
 def set_sandbox(runner: SandboxRunner | None) -> None:
     global _OVERRIDE
     _OVERRIDE = runner
-
 
 def get_sandbox() -> SandboxRunner:
     if _OVERRIDE is not None:

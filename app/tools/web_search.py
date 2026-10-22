@@ -7,7 +7,6 @@ from langchain_core.tools import tool
 
 logger = logging.getLogger(__name__)
 
-
 @tool(
     "web_search",
     description=(

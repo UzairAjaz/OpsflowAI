@@ -1,13 +1,3 @@
-"""P2-26 check: Week 4 integration test.
-
-Proves the Week 4 pipeline:
-
-    incident -> approval request notification -> external decision (Slack/email/API)
-             -> resume -> completed          + escalation on timeout
-
-Deterministic (fake notifier, injected graph): no LLM, no external services.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -27,14 +17,12 @@ from integrations.notifications import FakeNotifier, dispatch_approval
 
 SERVICE = "week4-check"
 
-
 def _min_graph():
     builder = StateGraph(OpsFlowState)
     builder.add_node("approval", approval)
     builder.add_edge(START, "approval")
     builder.add_conditional_edges("approval", route_after_approval, {"execute": END, "reject": END})
     return builder.compile(checkpointer=make_checkpointer("postgres"))
-
 
 def _cleanup(thread_id: str) -> None:
     with SessionLocal() as session:
@@ -43,7 +31,6 @@ def _cleanup(thread_id: str) -> None:
     with engine.begin() as connection:
         for table in ("checkpoint_writes", "checkpoint_blobs", "checkpoints"):
             connection.execute(text(f"DELETE FROM {table} WHERE thread_id = :tid"), {"tid": thread_id})
-
 
 def main() -> None:
     thread_id = f"week4-{uuid.uuid4().hex[:8]}"
@@ -124,7 +111,6 @@ def main() -> None:
         print("     approval request -> notification -> external decision -> resume -> escalation")
     finally:
         _cleanup(thread_id)
-
 
 if __name__ == "__main__":
     main()

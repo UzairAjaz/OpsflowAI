@@ -1,15 +1,3 @@
-"""P2-10 check: multi-tenant knowledge base and graceful fallback chain.
-
-Verifies:
-- tenant KB results are used first (no fallback),
-- an empty tenant KB falls through to live connectors,
-- an empty connector falls through to web search (marked low confidence),
-- tenant isolation (a query never returns another tenant's documents),
-- namespace derivation,
-- the kb_search tool,
-- tenant_id is normalized and persisted on alerts and incidents.
-"""
-
 from __future__ import annotations
 
 import time
@@ -28,7 +16,6 @@ from integrations.knowledge_service import KnowledgeService
 from integrations.tenant_kb import TenantVectorKnowledgeBase
 from worker.tasks import create_incident
 
-
 class StubWeb:
     def retrieve(
         self, *, tenant_id: str, query: str, max_results: int = 5, service=None, error_class=None
@@ -44,10 +31,8 @@ class StubWeb:
             )
         ]
 
-
 def _hit(title: str) -> ResearchResult:
     return ResearchResult(source="kb", title=title, url=None, snippet="runbook steps", score=0.9)
-
 
 def build_service() -> KnowledgeService:
     tenant_kb = FakeKnowledgeBase()
@@ -57,7 +42,6 @@ def build_service() -> KnowledgeService:
     return KnowledgeService(
         [("tenant_kb", tenant_kb), ("live_connector", connector), ("web", StubWeb())]
     )
-
 
 def main() -> None:
     service = build_service()
@@ -132,7 +116,6 @@ def main() -> None:
             session.commit()
 
     print("[ok] P2-10 -- multi-tenant knowledge base + fallback chain working.")
-
 
 if __name__ == "__main__":
     main()

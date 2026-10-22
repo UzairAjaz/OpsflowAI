@@ -1,10 +1,3 @@
-"""Redis sliding-window rate limiting for inbound alerts.
-
-Each service has its own window. If Redis is unavailable the limiter fails
-open (alerts are allowed) and logs a warning, so an outage of the cache does
-not block incident detection.
-"""
-
 from __future__ import annotations
 
 import time
@@ -17,13 +10,11 @@ from observability.logging import get_logger
 
 _CLIENT: redis.Redis | None = None
 
-
 def get_client() -> redis.Redis:
     global _CLIENT
     if _CLIENT is None:
         _CLIENT = redis.Redis.from_url(settings.redis_url, decode_responses=True)
     return _CLIENT
-
 
 class SlidingWindowRateLimiter:
     def __init__(self, client: redis.Redis, limit: int, window_seconds: int) -> None:
@@ -50,7 +41,6 @@ class SlidingWindowRateLimiter:
             get_logger(stage="ratelimit").warning(f"redis unavailable; allowing alert: {exc}")
             return True
         return int(count) <= self._limit
-
 
 def get_rate_limiter() -> SlidingWindowRateLimiter:
     return SlidingWindowRateLimiter(

@@ -1,5 +1,3 @@
-"""P2-34..P2-36 check: post-incident reports, feedback loop, calibration."""
-
 from __future__ import annotations
 
 import uuid
@@ -16,7 +14,6 @@ from integrations.feedback import process_feedback
 
 SERVICE = "learning-check"
 
-
 def _cleanup() -> None:
     with SessionLocal() as session:
         incidents = (
@@ -29,7 +26,6 @@ def _cleanup() -> None:
         for incident in incidents:
             session.delete(incident)
         session.commit()
-
 
 def main() -> None:
     _cleanup()
@@ -90,7 +86,6 @@ def main() -> None:
         _cleanup()
         for path in Path("reports").glob("learn-*.md"):
             path.unlink()
-
 
 if __name__ == "__main__":
     main()

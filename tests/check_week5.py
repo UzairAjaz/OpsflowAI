@@ -1,9 +1,3 @@
-"""P2-30 check: Week 5 integration test (executor -> canary).
-
-Proves progressive delivery: the fix is applied, then rolled out 10% -> 100%
-with metric gates; a healthy rollout completes and a failing one auto-rolls back.
-"""
-
 from __future__ import annotations
 
 from langgraph.graph import END, START, StateGraph
@@ -19,7 +13,6 @@ from integrations.canary import (
     set_metrics_provider,
 )
 
-
 def _seed(state: OpsFlowState) -> dict:
     return {
         "diagnosis": "OOM killed",
@@ -34,7 +27,6 @@ def _seed(state: OpsFlowState) -> dict:
         "requires_approval": False,
     }
 
-
 def build_graph():
     builder = StateGraph(OpsFlowState)
     builder.add_node("seed", _seed)
@@ -45,7 +37,6 @@ def build_graph():
     builder.add_edge("executor", "canary")
     builder.add_edge("canary", END)
     return builder.compile(checkpointer=make_checkpointer("memory"))
-
 
 def main() -> None:
     graph = build_graph()
@@ -79,7 +70,6 @@ def main() -> None:
     finally:
         set_canary_controller(None)
         set_metrics_provider(None)
-
 
 if __name__ == "__main__":
     main()

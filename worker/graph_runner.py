@@ -1,9 +1,3 @@
-"""Runs the OpsFlow graph for an incident.
-
-The graph is compiled with the PostgreSQL checkpointer so an incident can pause
-for approval and be resumed later by another process.
-"""
-
 from __future__ import annotations
 
 from app.checkpointer import make_checkpointer
@@ -12,13 +6,11 @@ from app.state import new_incident
 
 _GRAPH = None
 
-
 def get_graph():
     global _GRAPH
     if _GRAPH is None:
         _GRAPH = build_graph(make_checkpointer("postgres"))
     return _GRAPH
-
 
 def run_incident(
     *,

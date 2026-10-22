@@ -1,10 +1,3 @@
-"""Background tasks for incident processing.
-
-Creating an incident is idempotent: it checks whether the processed alert already
-has an incident_id before creating one. This makes the job safe to retry after a
-worker restart or a re-delivered job.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -15,9 +8,8 @@ from db.session import SessionLocal
 from observability.logging import get_logger
 from worker.graph_runner import run_incident
 
-
 def create_incident(alert_signature: str) -> tuple[str, bool]:
-    """Create an incident for an alert if one does not already exist."""
+
     with SessionLocal() as session:
         row = session.get(ProcessedAlert, alert_signature)
         if row is None:
@@ -39,7 +31,6 @@ def create_incident(alert_signature: str) -> tuple[str, bool]:
         row.incident_id = incident.incident_id
         session.commit()
         return str(incident.incident_id), True
-
 
 def handle_new_alert(alert_signature: str, payload: dict, graph=None) -> dict:
     incident_id, created = create_incident(alert_signature)

@@ -1,9 +1,3 @@
-"""Approval service: resume a paused incident exactly once.
-
-The graph is loaded with the PostgreSQL checkpointer, so a pending approval can
-be resumed from any process (API worker, Slack callback, email link).
-"""
-
 from __future__ import annotations
 
 from langgraph.types import Command
@@ -12,18 +6,15 @@ from db.models import Incident
 from db.session import SessionLocal
 from observability.logging import get_logger
 
-
 def _default_graph():
     from worker.graph_runner import get_graph
 
     return get_graph()
 
-
 def is_pending(*, thread_id: str, graph=None) -> bool:
     compiled = graph if graph is not None else _default_graph()
     snapshot = compiled.get_state({"configurable": {"thread_id": thread_id}})
     return snapshot.next == ("approval",)
-
 
 def resume_incident(*, thread_id: str, approved: bool, approver: str, graph=None) -> dict:
     compiled = graph if graph is not None else _default_graph()

@@ -1,11 +1,3 @@
-"""Evaluation harness.
-
-Scores remediation choice against a golden dataset. It runs deterministically
-with a keyword mapper (no LLM) so it can run in CI; the real agent can be
-substituted later. Metrics: correct-remediation accuracy and false-safe rate
-(a safe action proposed where a higher-risk action was expected).
-"""
-
 from __future__ import annotations
 
 import json
@@ -28,14 +20,12 @@ KEYWORD_MAP: dict[str, str] = {
     "exited": "restart_container",
 }
 
-
 def stub_propose(case: dict) -> str | None:
     text = f"{case.get('error_class', '')} {case.get('error_log', '')}".lower()
     for keyword, remediation_id in KEYWORD_MAP.items():
         if keyword in text:
             return remediation_id
     return None
-
 
 def run(path: Path | None = None, verbose: bool = False) -> dict:
     catalog = load_catalog()
@@ -89,7 +79,6 @@ def run(path: Path | None = None, verbose: bool = False) -> dict:
         "results": results,
     }
 
-
 def main() -> None:
     outcome = run(verbose=True)
     print(
@@ -99,7 +88,6 @@ def main() -> None:
     if outcome["false_safe_rate"] > 0:
         raise SystemExit("false-safe proposals detected")
     print("[ok] eval harness complete")
-
 
 if __name__ == "__main__":
     main()
