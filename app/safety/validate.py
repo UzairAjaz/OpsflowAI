@@ -65,9 +65,14 @@ def validate_proposal(catalog: Catalog, remediation: Remediation | None) -> Vali
 
 def build_argv(template: list[str], resolved: dict[str, str]) -> list[str]:
     def repl(match: re.Match[str]) -> str:
-        return resolved[match.group(1)]
+        return resolved.get(match.group(1), "")
 
-    return [_PLACEHOLDER.sub(repl, token) for token in template]
+    argv: list[str] = []
+    for token in template:
+        rendered = _PLACEHOLDER.sub(repl, token)
+        if rendered:
+            argv.append(rendered)
+    return argv
 
 def build_command(spec: RemediationSpec, resolved: dict[str, str]) -> list[str]:
     return build_argv(spec.command_template, resolved)

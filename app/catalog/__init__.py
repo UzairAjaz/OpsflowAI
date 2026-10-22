@@ -22,6 +22,7 @@ class RemediationSpec(BaseModel):
     description: str
     risk: Literal["safe", "medium", "high"]
     reversible: bool
+    execution_mode: Literal["command", "simulated"] = "command"
     command_template: list[str]
     params: dict[str, ParamSpec] = Field(default_factory=dict)
     validation_commands: list[list[str]] = Field(default_factory=list)

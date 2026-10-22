@@ -1,15 +1,6 @@
-"""Sandbox node: apply the catalog fix in isolation, validate, audit, rollback.
-
-Flow:
-    risk -> sandbox -> validated? -> approval (if required) or executor
-                    -> failed, attempts left -> propose (self-correction)
-                    -> failed, attempts exhausted -> escalate
-
-Every attempt is written to execution_logs (immutable audit trail). Irreversible
-actions without a rollback plan are escalated instead of executed.
-"""
-
 from __future__ import annotations
+
+import time
 
 from sqlalchemy import select
 
@@ -17,9 +8,9 @@ from app.catalog import load_catalog
 from app.config import settings
 from app.safety.validate import build_argv, build_command, validate_proposal
 from app.state import AuditEvent, CheckResult, ExecutionResult, OpsFlowState
+from observability.logging import get_logger
 
 _catalog = load_catalog()
-
 
 def _write_execution_log(state, spec, argv, environment, passed, checks, rollback_argv) -> None:
     try:
@@ -57,7 +48,6 @@ def _write_execution_log(state, spec, argv, environment, passed, checks, rollbac
     except Exception:
         pass
 
-
 def run_sandbox(state: OpsFlowState) -> dict:
     remediation = state.get("proposed_remediation")
     result = validate_proposal(_catalog, remediation) if remediation else None
@@ -87,6 +77,42 @@ def run_sandbox(state: OpsFlowState) -> dict:
                     actor="agent",
                     action="sandbox",
                     detail="irreversible action without rollback plan; escalated",
+                )
+            ],
+        }
+
+    if spec.execution_mode == "simulated":
+        start = time.perf_counter()
+        get_logger(stage="sandbox", remediation_id=spec.id).info(
+            f"simulated validation command: {' '.join(argv)}"
+        )
+        attempts = state.get("sandbox_attempts", 0) + 1
+        _write_execution_log(state, spec, argv, "simulated", True, [], rollback_argv)
+        execution = ExecutionResult(
+            remediation_id=spec.id,
+            command=argv,
+            dry_run=True,
+            exit_code=0,
+            stdout="Simulated success",
+            duration_ms=int((time.perf_counter() - start) * 1000),
+        )
+        return {
+            "sandbox_result": execution,
+            "sandbox_checks": {
+                "environment": "simulated",
+                "checks": [],
+                "rollback": rollback_argv,
+            },
+            "rollback_plan": rollback_argv or [],
+            "sandbox_attempts": attempts,
+            "sandbox_feedback": None,
+            "validated": True,
+            "status": "validated",
+            "audit": [
+                AuditEvent(
+                    actor="agent",
+                    action="sandbox",
+                    detail=f"simulated validation passed (attempt {attempts})",
                 )
             ],
         }
@@ -169,7 +195,6 @@ def run_sandbox(state: OpsFlowState) -> dict:
             )
         ],
     }
-
 
 def route_after_sandbox(state: OpsFlowState) -> str:
     if state.get("validated"):

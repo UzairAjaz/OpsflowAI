@@ -71,6 +71,24 @@ Interactive (paste a multi-line log, blank line to finish):
 
 Flow: `intake → analyzer → researcher ⇄ critic → risk → [approval] → executor`.
 
+### Code-specific remediations (simulated)
+
+The catalog also supports non-Docker actions:
+
+- `run_python_script` — run a Python maintenance script (`script_path`, optional `args`)
+- `execute_ssh_command` — run a safe command on a target server (`host`, `command`)
+- `flush_redis_cache` — clear Redis keys matching a pattern (`key_pattern`)
+
+These entries use `execution_mode: simulated`. The executor logs the command,
+waits one second, and returns a successful `ExecutionResult`
+(`exit_code=0`, `stdout="Simulated success"`). The sandbox also bypasses real
+runners for these actions, so demos never connect to SSH/Redis or execute a
+script. Inspect the catalog with:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.check_catalog
+```
+
 ### 4. Approval (medium/high risk)
 
 The graph **pauses** and asks:

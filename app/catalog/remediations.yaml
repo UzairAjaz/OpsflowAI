@@ -79,3 +79,43 @@ remediations:
       volume_name:
         type: string
         required: true
+
+  - id: run_python_script
+    description: Execute a Python script for cache clearing or database resets
+    risk: medium
+    reversible: true
+    execution_mode: simulated
+    command_template: ["python", "{script_path}", "{args}"]
+    params:
+      script_path:
+        type: string
+        required: true
+      args:
+        type: string
+        required: false
+
+  - id: execute_ssh_command
+    description: Run a safe bash command on a target server over SSH
+    risk: medium
+    reversible: true
+    execution_mode: simulated
+    command_template: ["ssh", "{host}", "{command}"]
+    params:
+      host:
+        type: string
+        required: true
+      command:
+        type: string
+        required: true
+
+  - id: flush_redis_cache
+    description: Clear Redis keys matching a key pattern
+    risk: safe
+    reversible: true
+    execution_mode: simulated
+    command_template:
+      ["redis-cli", "--scan", "--pattern", "{key_pattern}", "|", "xargs", "-r", "redis-cli", "DEL"]
+    params:
+      key_pattern:
+        type: string
+        required: true
