@@ -18,7 +18,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    ollama_model: str = Field(default="llama3.2")
+    ollama_model: str = Field(default="qwen2.5:3b")
     ollama_base_url: str = Field(default="http://localhost:11434")
     llm_temperature: float = Field(default=0.0)
 

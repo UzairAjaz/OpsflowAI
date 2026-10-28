@@ -28,10 +28,9 @@ leta hai → **vetted catalog** se safe action execute karta hai.
 
 - **Python 3.11+** (tested on 3.14)
 - **[Ollama](https://ollama.com)** installed and running (`ollama list` should work)
-- A model pulled:
+- The project model pulled:
   ```powershell
-  ollama pull qwen2.5:7b      # recommended (~4.7 GB)
-  # or: ollama pull llama3.2   # lighter fallback
+  ollama pull qwen2.5:3b      # required (~1.9 GB)
   ```
 
 ### 1. Setup (Windows / PowerShell)
@@ -110,7 +109,7 @@ Non-interactive testing (pipe the answer):
 
 | Var | Default | Meaning |
 |---|---|---|
-| `OLLAMA_MODEL` | `qwen2.5:7b` | Which local model to use |
+| `OLLAMA_MODEL` | `qwen2.5:3b` | Which local model to use |
 | `MAX_LOOPS` | `3` | Max critic↔researcher iterations |
 | `CONFIDENCE_THRESHOLD` | `70` | Below this → refine / escalate |
 | `WEB_MAX_RESULTS` | `5` | Web results per query |
@@ -122,7 +121,7 @@ Override per-run: `$env:MAX_LOOPS="2"; .\.venv\Scripts\python.exe -m app.cli "..
 ### Troubleshooting
 
 - **Ollama connection error** → make sure the Ollama app / `ollama serve` is running.
-- **Model not found** → `ollama pull qwen2.5:7b` (or set `OLLAMA_MODEL` to an available model).
+- **Model not found** → `ollama pull qwen2.5:3b`.
 - **Emoji/console crash on Windows** → the CLI forces UTF-8; run from the project root.
 
 ### Verification scripts

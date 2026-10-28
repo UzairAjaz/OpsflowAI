@@ -10,9 +10,13 @@ _catalog = load_catalog()
 def approval(state: OpsFlowState) -> dict:
     remediation = state.get("proposed_remediation")
     spec = _catalog.get(remediation.remediation_id) if remediation else None
+    params = state.get("resolved_params") or (remediation.params if remediation else {})
 
     payload = {
-        "question": "Approve this remediation? (yes/no)",
+        "question": "Do I implement it? (yes/no)",
+        "solution": (
+            f"{remediation.remediation_id}({params})" if remediation else None
+        ),
         "thread_id": state.get("thread_id"),
         "diagnosis": state.get("diagnosis"),
         "root_cause": state.get("root_cause"),
@@ -23,7 +27,7 @@ def approval(state: OpsFlowState) -> dict:
         "risk_level": state.get("risk_level"),
         "reversible": spec.reversible if spec else None,
         "remediation_id": remediation.remediation_id if remediation else None,
-        "params": state.get("resolved_params") or (remediation.params if remediation else {}),
+        "params": params,
         "rationale": remediation.rationale if remediation else None,
         "critic_score": state.get("critic_score"),
         "validated": state.get("validated"),

@@ -20,18 +20,23 @@ def _ask_approval(payload: dict) -> dict:
     print("=" * 62)
     print(f"  Diagnosis  : {payload.get('diagnosis')}")
     print(f"  Root cause : {payload.get('root_cause')}")
+    print(f"  Severity   : {payload.get('severity')}")
+    print("")
+    print("  Proposed solution:")
+    print(f"    Action     : {payload.get('remediation_id')}")
+    print(f"    Parameters : {payload.get('params')}")
+    print(f"    Rationale  : {payload.get('rationale')}")
     print(
-        f"  Severity   : {payload.get('severity')}  "
-        f"(risk={payload.get('risk_level')}, reversible={payload.get('reversible')})"
+        f"    Risk       : {payload.get('risk_level')} "
+        f"(reversible={payload.get('reversible')})"
     )
-    print(f"  Remediation: {payload.get('remediation_id')}({payload.get('params')})")
-    print(f"  Rationale  : {payload.get('rationale')}")
-    print(f"  Critic     : {payload.get('critic_score')}")
+    print(f"    Sandbox    : {'passed' if payload.get('validated') else 'not run'}")
+    print(f"    Critic     : {payload.get('critic_score')}")
 
     try:
-        ans = input("\n  Approve? (y/n): ").strip().lower()
+        ans = input("\nDo I implement it? (yes/no): ").strip().lower()
     except EOFError:
-        ans = "n"
+        ans = "no"
     return {"approved": ans.startswith("y"), "approver": "cli-user"}
 
 def run(error_log: str, thread_id: str | None = None) -> dict:

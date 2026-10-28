@@ -67,7 +67,15 @@ class ConsoleNotifier:
     def send_approval_request(self, *, summary: dict) -> NotificationResult:
         print(
             f"[notify:console] approval required for {summary.get('thread_id')} "
-            f"({summary.get('service')}): {summary.get('remediation_id')}"
+            f"({summary.get('service')})"
+        )
+        print(
+            f"[notify:console] proposed solution: {summary.get('solution')} "
+            f"| rationale: {summary.get('rationale')}"
+        )
+        print(
+            f"[notify:console] {summary.get('question', 'Do I implement it? (yes/no)')} "
+            "Run: python approve_pending.py --wait"
         )
         return NotificationResult(channel=self.name, ok=True, detail="printed to console")
 
