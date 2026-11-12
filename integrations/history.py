@@ -34,6 +34,9 @@ def find_prior_fix(
             Incident.service == service,
             Incident.error_class == error_class,
             FixOutcome.applied_at >= cutoff,
+            FixOutcome.remediation_id.is_not(None),
+            FixOutcome.remediation_id != "",
+            FixOutcome.remediation_id != "unknown",
         )
     )
     outcomes = session.execute(statement).scalars().all()

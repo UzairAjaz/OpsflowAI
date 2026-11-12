@@ -30,7 +30,8 @@ leta hai → **vetted catalog** se safe action execute karta hai.
 - **[Ollama](https://ollama.com)** installed and running (`ollama list` should work)
 - The project model pulled:
   ```powershell
-  ollama pull qwen2.5:3b      # required (~1.9 GB)
+  ollama pull qwen2.5:3b        # planning / diagnosis (~1.9 GB)
+  ollama pull nomic-embed-text  # rulebook embeddings (~274 MB)
   ```
 
 ### 1. Setup (Windows / PowerShell)
@@ -88,6 +89,18 @@ script. Inspect the catalog with:
 .\.venv\Scripts\python.exe -m scripts.check_catalog
 ```
 
+### MediConnect rulebook API
+
+Rulebooks are tenant-scoped and embedded with `nomic-embed-text`:
+
+```text
+POST   /api/v1/tenants/{tenant_id}/rulebooks
+GET    /api/v1/tenants/{tenant_id}/rulebooks
+GET    /api/v1/tenants/{tenant_id}/rulebooks/{rulebook_id}
+PUT    /api/v1/tenants/{tenant_id}/rulebooks/{rulebook_id}
+DELETE /api/v1/tenants/{tenant_id}/rulebooks/{rulebook_id}
+```
+
 ### 4. Approval (medium/high risk)
 
 The graph **pauses** and asks:
@@ -107,9 +120,18 @@ Non-interactive testing (pipe the answer):
 
 ### Configuration knobs (`.env` or env vars)
 
+All runtime settings are defined in `app/config.py` and loaded from `.env`.
+Use `.env.example` as the canonical list of supported variables. See
+[`docs/CONFIGURATION_GUIDE.md`](./docs/CONFIGURATION_GUIDE.md) for profiles,
+variable groups, and secret handling.
+
 | Var | Default | Meaning |
 |---|---|---|
+| `ENVIRONMENT` | `local` | `local`, `staging`, or `production` |
+| `QUEUE_NAME` | `incidents` | Redis/RQ queue name |
+| `REPORTS_DIR` | `reports` | Output directory for Markdown reports |
 | `OLLAMA_MODEL` | `qwen2.5:3b` | Which local model to use |
+| `EMBEDDING_MODEL` | `nomic-embed-text` | Model used for rulebook embeddings |
 | `MAX_LOOPS` | `3` | Max critic↔researcher iterations |
 | `CONFIDENCE_THRESHOLD` | `70` | Below this → refine / escalate |
 | `WEB_MAX_RESULTS` | `5` | Web results per query |

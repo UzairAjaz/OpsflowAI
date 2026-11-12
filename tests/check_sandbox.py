@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy import delete, select
 
+from app.config import settings
 from app.nodes.sandbox import route_after_sandbox, run_sandbox
 from app.state import Remediation, new_incident
 from db.models import ExecutionLog
@@ -26,6 +27,9 @@ def _cleanup_logs() -> None:
         session.commit()
 
 def main() -> None:
+    original_attempts = settings.sandbox_max_attempts
+    settings.sandbox_max_attempts = 2
+
     _cleanup_logs()
 
     set_sandbox(FakeSandbox(default_exit=0))
@@ -86,6 +90,7 @@ def main() -> None:
     print("docker      -> real container ran df -h (exit", result["sandbox_result"].exit_code, ")")
 
     set_sandbox(None)
+    settings.sandbox_max_attempts = original_attempts
     _cleanup_logs()
     print("[ok] P2-16..P2-19 -- sandbox execution, validation, rollback, audit working.")
 

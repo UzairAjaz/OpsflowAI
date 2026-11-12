@@ -16,6 +16,7 @@ from app.nodes.research import (
     research_kb,
     research_web,
 )
+from app.nodes.report import generate_report, route_after_report
 from app.nodes.researcher import propose
 from app.nodes.risk import classify, route_after_risk
 from app.nodes.sandbox import route_after_sandbox, run_sandbox
@@ -37,6 +38,7 @@ def build_graph(checkpointer: BaseCheckpointSaver | None = None):
     builder.add_node("scoring", score)
     builder.add_node("risk", classify)
     builder.add_node("sandbox", run_sandbox)
+    builder.add_node("report", generate_report)
     builder.add_node("approval", approval)
     builder.add_node("executor", execute)
 
@@ -72,7 +74,13 @@ def build_graph(checkpointer: BaseCheckpointSaver | None = None):
     builder.add_conditional_edges(
         "sandbox",
         route_after_sandbox,
-        {"approval": "approval", "execute": "executor", "retry": "propose", "escalate": END},
+        {"approval": "report", "execute": "report", "retry": "propose", "escalate": END},
+    )
+
+    builder.add_conditional_edges(
+        "report",
+        route_after_report,
+        {"approval": "approval", "execute": "executor"},
     )
 
     builder.add_conditional_edges(

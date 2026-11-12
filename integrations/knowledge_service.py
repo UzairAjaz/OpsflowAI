@@ -70,6 +70,14 @@ class KnowledgeService:
             tried += 1
         return KnowledgeResponse(results=[], source_used=None, fallback_used=False)
 
+def _rulebook_sources() -> list[tuple[str, KnowledgeBase]]:
+    if not settings.rulebook_retrieval_enabled:
+        return []
+
+    from integrations.rulebook_kb import RulebookRetriever
+
+    return [("pgvector", RulebookRetriever())]
+
 def _kb_sources() -> list[tuple[str, KnowledgeBase]]:
     sources: list[tuple[str, KnowledgeBase]] = []
 
@@ -109,11 +117,14 @@ def _kb_sources() -> list[tuple[str, KnowledgeBase]]:
 
 def get_internal_knowledge_service() -> KnowledgeService:
 
-    return KnowledgeService(_kb_sources(), fallback_enabled=True)
+    return KnowledgeService(
+        [*_rulebook_sources(), *_kb_sources()],
+        fallback_enabled=True,
+    )
 
 def get_knowledge_service() -> KnowledgeService:
 
-    sources = _kb_sources()
+    sources = [*_rulebook_sources(), *_kb_sources()]
 
     from integrations.history import HistoryKnowledgeBase
 

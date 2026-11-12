@@ -3,7 +3,9 @@ from __future__ import annotations
 import hashlib
 import hmac
 
-SIGNATURE_HEADER = "X-Signature"
+from app.config import settings
+
+SIGNATURE_HEADER = settings.webhook_signature_header
 
 def _digest(secret: str, body: bytes) -> str:
     return hmac.new(secret.encode("utf-8"), body, hashlib.sha256).hexdigest()
@@ -40,8 +42,16 @@ def parse_tenant_api_keys(raw: str) -> dict[str, str]:
         pair = pair.strip()
         if not pair or ":" not in pair:
             continue
-        tenant, key = pair.split(":", 1)
-        mapping[key.strip()] = tenant.strip()
+
+        parts = pair.split(":")
+        if len(parts) >= 3:
+            tenant, _role, *key_parts = parts
+            key = ":".join(key_parts)
+        else:
+            tenant, key = parts
+
+        if tenant.strip() and key.strip():
+            mapping[key.strip()] = tenant.strip()
     return mapping
 
 def authenticate_api_key(raw_keys: str, api_key: str | None) -> str | None:

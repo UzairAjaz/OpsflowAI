@@ -44,16 +44,20 @@ def process_feedback(*, now: datetime | None = None, horizon_hours: int | None =
                 .all()
             )
             latest = logs[-1] if logs else None
+            if latest is None:
+                # Never record a fix outcome without an execution to attribute it to.
+                continue
             stable = incident.status in SUCCESS_STATUSES
             outcome = "success" if stable else "failure"
 
             session.add(
                 FixOutcome(
                     incident_id=incident.incident_id,
-                    remediation_id=(latest.remediation_id if latest else "unknown"),
-                    params=(latest.params if latest else {}),
+                    tenant_id=incident.tenant_id,
+                    remediation_id=latest.remediation_id,
+                    params=latest.params or {},
                     outcome=outcome,
-                    confidence=((latest.sandbox_checks or {}).get("confidence") if latest else None),
+                    confidence=(latest.sandbox_checks or {}).get("confidence"),
                     applied_at=incident.created_at,
                     verified_at=now,
                     stable=stable,

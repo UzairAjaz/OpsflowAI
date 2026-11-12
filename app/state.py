@@ -104,6 +104,7 @@ class OpsFlowState(TypedDict, total=False):
     human_approval: Optional[bool]
     approver: Optional[str]
 
+    report: str
     execution_result: Optional[ExecutionResult]
     sandbox_result: Optional[ExecutionResult]
     sandbox_checks: dict

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import httpx
 
+from app.config import settings
 from app.state import ResearchResult
 
 class TenantVectorKnowledgeBase:
@@ -16,6 +17,7 @@ class TenantVectorKnowledgeBase:
         self._api_key = api_key
         self._namespace_prefix = namespace_prefix
         self._timeout = timeout
+        self._search_path = settings.tenant_kb_search_path
 
     def namespace_for(self, tenant_id: str) -> str:
         return f"{self._namespace_prefix}{tenant_id}"
@@ -37,7 +39,11 @@ class TenantVectorKnowledgeBase:
         }
         headers = {"Authorization": f"Bearer {self._api_key}"} if self._api_key else {}
         with httpx.Client(timeout=self._timeout) as client:
-            response = client.post(f"{self._base_url}/v1/search", json=payload, headers=headers)
+            response = client.post(
+                f"{self._base_url}{self._search_path}",
+                json=payload,
+                headers=headers,
+            )
             response.raise_for_status()
             data = response.json()
 

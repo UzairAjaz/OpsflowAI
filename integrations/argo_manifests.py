@@ -4,9 +4,12 @@ from pathlib import Path
 
 import yaml
 
+from app.config import settings
+
 def build_rollout_manifest(
-    *, name: str, image: str, steps: list[int], namespace: str = "default"
+    *, name: str, image: str, steps: list[int], namespace: str | None = None
 ) -> dict:
+    namespace = namespace or settings.argo_namespace
     canary_steps: list[dict] = []
     for percentage in steps[:-1]:
         canary_steps.append({"setWeight": percentage})
@@ -38,11 +41,13 @@ def build_rollout_manifest(
 def build_analysis_template(
     *,
     name: str,
-    namespace: str = "default",
+    namespace: str | None = None,
     error_rate_threshold: float = 0.05,
     p95_threshold_ms: int = 500,
-    prometheus_address: str = "http://prometheus.monitoring:9090",
+    prometheus_address: str | None = None,
 ) -> dict:
+    namespace = namespace or settings.argo_namespace
+    prometheus_address = prometheus_address or settings.argo_prometheus_address
     return {
         "apiVersion": "argoproj.io/v1alpha1",
         "kind": "AnalysisTemplate",
@@ -88,10 +93,10 @@ def write_manifests(
     name: str,
     image: str,
     steps: list[int],
-    namespace: str = "default",
-    out_dir: str = "deploy/k8s",
+    namespace: str | None = None,
+    out_dir: str | None = None,
 ) -> tuple[dict, dict]:
-    out = Path(out_dir)
+    out = Path(out_dir or settings.deploy_k8s_dir)
     out.mkdir(parents=True, exist_ok=True)
 
     rollout = build_rollout_manifest(name=name, image=image, steps=steps, namespace=namespace)

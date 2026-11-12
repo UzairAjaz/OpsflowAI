@@ -73,9 +73,18 @@ def handle_new_alert(alert_signature: str, payload: dict, graph=None) -> dict:
         summary = result["__interrupt__"][0].value
         from integrations.notifications import dispatch_approval
 
-        dispatch_approval(summary)
+        results = dispatch_approval(summary)
+        delivery = ", ".join(
+            f"{result.channel}={'ok' if result.ok else 'failed'}"
+            + (f" ({result.detail})" if result.detail and not result.ok else "")
+            for result in results
+        )
         get_logger(stage="worker", incident_id=incident_id).info(
-            "approval requested; notifications dispatched"
+            f"approval requested; notifications: {delivery}"
+        )
+    elif graph_status == "escalated":
+        get_logger(stage="worker", incident_id=incident_id).warning(
+            "incident escalated before approval; no approval notification sent"
         )
 
     get_logger(stage="worker", incident_id=incident_id, status=graph_status).info(

@@ -32,6 +32,7 @@ def approval(state: OpsFlowState) -> dict:
         "critic_score": state.get("critic_score"),
         "validated": state.get("validated"),
         "sandbox": state.get("sandbox_checks"),
+        "report": state.get("report"),
     }
 
     decision = interrupt(payload)

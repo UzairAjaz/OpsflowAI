@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from app.approval_service import resume_incident
 from app.catalog import load_catalog
+from app.config import settings
 from app.safety.validate import build_command
 from db.models import Incident
 from db.session import SessionLocal
@@ -95,7 +96,7 @@ def main() -> None:
     result = resume_incident(
         thread_id=thread_id,
         approved=approved,
-        approver="demo-cli",
+        approver=settings.demo_approver,
         graph=graph,
     )
     print(f"\nDecision: {'APPROVED' if approved else 'REJECTED'}")

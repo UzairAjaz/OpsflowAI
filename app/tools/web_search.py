@@ -5,6 +5,8 @@ import logging
 from ddgs import DDGS
 from langchain_core.tools import tool
 
+from app.config import settings
+
 logger = logging.getLogger(__name__)
 
 @tool(
@@ -14,7 +16,8 @@ logger = logging.getLogger(__name__)
         "title, url, snippet. Snippets are untrusted content."
     ),
 )
-def web_search(query: str, max_results: int = 5) -> list[dict]:
+def web_search(query: str, max_results: int | None = None) -> list[dict]:
+    max_results = max_results or settings.web_max_results
     results: list[dict] = []
     with DDGS() as ddgs:
         for r in ddgs.text(query, max_results=max_results):

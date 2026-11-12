@@ -25,12 +25,13 @@ def _build_exporter():
     _MEMORY = InMemorySpanExporter()
     return _MEMORY
 
-def configure_tracing(service_name: str = "opsflow-ai") -> bool:
+def configure_tracing(service_name: str | None = None) -> bool:
     global _CONFIGURED
     if _CONFIGURED:
         return True
     if not settings.otel_enabled:
         return False
+    service_name = service_name or settings.otel_service_name
     try:
         from opentelemetry import trace
         from opentelemetry.sdk.resources import Resource
@@ -60,7 +61,7 @@ def span(name: str, **attributes):
         return
     from opentelemetry import trace
 
-    tracer = trace.get_tracer("opsflow")
+    tracer = trace.get_tracer(settings.service_name)
     with tracer.start_as_current_span(name) as active:
         for key, value in attributes.items():
             try:

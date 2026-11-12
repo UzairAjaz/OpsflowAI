@@ -4,6 +4,7 @@ import sys
 
 from langgraph.types import Command
 
+from app.config import settings
 from app.graph import graph
 from app.state import new_incident
 
@@ -37,7 +38,7 @@ def _ask_approval(payload: dict) -> dict:
         ans = input("\nDo I implement it? (yes/no): ").strip().lower()
     except EOFError:
         ans = "no"
-    return {"approved": ans.startswith("y"), "approver": "cli-user"}
+    return {"approved": ans.startswith("y"), "approver": settings.cli_approver}
 
 def run(error_log: str, thread_id: str | None = None) -> dict:
 

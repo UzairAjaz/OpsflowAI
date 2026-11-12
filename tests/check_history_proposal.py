@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from app.nodes.researcher import _CATALOG, _prior_proposal, propose
-from app.state import new_incident
+from app.config import settings
+from app.nodes.researcher import _CATALOG, _complete_proposal, _prior_proposal, propose
+from app.state import Remediation, new_incident
 
 def _state_with_prior(prior: dict) -> dict:
     state = new_incident("oom", tenant_id="acme", service="svc", error_class="OOMKilled")
@@ -54,6 +55,16 @@ def main() -> None:
     )
     assert _prior_proposal(invalid_params) is None
     print("bad params-> not preferred (catalog validation fails)")
+
+    incomplete = new_incident("oom", tenant_id="acme", service="svc", error_class="OOMKilled")
+    repaired, validation = _complete_proposal(
+        incomplete,
+        Remediation(remediation_id="increase_memory_limit", params={}, rationale="test"),
+    )
+    assert validation.ok, validation.errors
+    assert repaired.params["container_name"] == "svc"
+    assert repaired.params["new_memory_limit"] == settings.default_memory_limit
+    print("repair    ->", repaired.params)
 
     assert _CATALOG.get("increase_memory_limit") is not None
     print("[ok] P2-14 -- history-aware proposal working.")

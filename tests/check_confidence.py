@@ -19,6 +19,11 @@ def _full_state() -> dict:
     return state
 
 def main() -> None:
+    original_loops = settings.max_loops
+    original_threshold = settings.confidence_threshold
+    settings.max_loops = 3
+    settings.confidence_threshold = 70
+
     full = score_confidence(_full_state())
     print("full   ->", full.score, full.breakdown)
     assert full.score == 94, full.score
@@ -82,6 +87,8 @@ def main() -> None:
         mid_update["automation_eligible"],
     )
 
+    settings.max_loops = original_loops
+    settings.confidence_threshold = original_threshold
     print("[ok] P2-13 -- rubric confidence scoring working.")
 
 if __name__ == "__main__":

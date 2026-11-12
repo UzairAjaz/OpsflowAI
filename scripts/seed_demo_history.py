@@ -104,6 +104,7 @@ def main() -> None:
             session.add(
                 FixOutcome(
                     incident_id=incident.incident_id,
+                    tenant_id=TENANT_ID,
                     remediation_id=remediation_id,
                     params=params,
                     outcome="success",

@@ -11,7 +11,12 @@ from db.session import SessionLocal
 from integrations.notifications import dispatch_escalation
 from observability.logging import get_logger
 
-ESCALATION_RECIPIENTS = ["manager", "senior_manager", "cto"]
+def parse_escalation_recipients() -> list[str]:
+    return [
+        item.strip()
+        for item in settings.escalation_recipients.split(",")
+        if item.strip()
+    ]
 
 def parse_escalation_minutes() -> list[int]:
     values = [int(item) for item in settings.escalation_minutes.split(",") if item.strip()]
@@ -32,7 +37,10 @@ def due_escalation(*, elapsed_minutes: float, current_level: int) -> EscalationA
     if due_level == 0 or due_level <= current_level:
         return None
 
-    recipient = ESCALATION_RECIPIENTS[min(due_level - 1, len(ESCALATION_RECIPIENTS) - 1)]
+    recipients = parse_escalation_recipients()
+    if not recipients:
+        recipients = ["manager"]
+    recipient = recipients[min(due_level - 1, len(recipients) - 1)]
     return EscalationAction(
         level=due_level, due_minutes=thresholds[due_level - 1], recipient=recipient
     )

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import httpx
 
+from app.config import settings
 from app.state import ResearchResult
 
 class LiveConnectorKnowledgeBase:
@@ -9,6 +10,7 @@ class LiveConnectorKnowledgeBase:
         self._base_url = base_url.rstrip("/") if base_url else ""
         self._api_key = api_key
         self._timeout = timeout
+        self._search_path = settings.live_connector_search_path
 
     def retrieve(
         self,
@@ -25,7 +27,11 @@ class LiveConnectorKnowledgeBase:
         payload = {"tenant_id": tenant_id, "query": query, "top_k": max_results}
         headers = {"Authorization": f"Bearer {self._api_key}"} if self._api_key else {}
         with httpx.Client(timeout=self._timeout) as client:
-            response = client.post(f"{self._base_url}/v1/search", json=payload, headers=headers)
+            response = client.post(
+                f"{self._base_url}{self._search_path}",
+                json=payload,
+                headers=headers,
+            )
             response.raise_for_status()
             data = response.json()
 

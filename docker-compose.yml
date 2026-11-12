@@ -1,17 +1,17 @@
 services:
   postgres:
-    image: postgres:16
+    image: pgvector/pgvector:pg16
     container_name: opsflow-postgres
     environment:
-      POSTGRES_USER: opsflow
-      POSTGRES_PASSWORD: opsflow
-      POSTGRES_DB: opsflow
+      POSTGRES_USER: ${POSTGRES_USER:-opsflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opsflow}
+      POSTGRES_DB: ${POSTGRES_DB:-opsflow}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - opsflow_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U opsflow -d opsflow"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -20,7 +20,7 @@ services:
     image: redis:7
     container_name: opsflow-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - opsflow_redisdata:/data
     healthcheck:

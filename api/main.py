@@ -8,12 +8,13 @@ from sqlalchemy import text
 
 from api.routes.approvals import router as approvals_router
 from api.routes.metrics import router as metrics_router
+from api.routes.rulebooks import router as rulebooks_router
 from api.routes.webhooks import router as webhooks_router
 from app.config import settings
 from db.session import engine
 from observability.logging import configure_logging, get_logger
 
-configure_logging()
+configure_logging(settings.log_level)
 
 log = get_logger(stage="api")
 
@@ -23,10 +24,15 @@ async def lifespan(app: FastAPI):
     yield
     log.info("OpsFlow API stopped")
 
-app = FastAPI(title="OpsFlow AI API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(
+    title=settings.app_name,
+    version=settings.app_version,
+    lifespan=lifespan,
+)
 
 app.include_router(webhooks_router)
 app.include_router(approvals_router)
+app.include_router(rulebooks_router)
 app.include_router(metrics_router)
 
 @app.middleware("http")
@@ -45,7 +51,7 @@ async def request_logging_middleware(request, call_next):
 
 @app.get("/")
 def root() -> dict:
-    return {"service": "opsflow-api", "version": app.version, "docs": "/docs"}
+    return {"service": settings.service_name, "version": app.version, "docs": "/docs"}
 
 @app.get("/healthz")
 def healthz() -> dict:

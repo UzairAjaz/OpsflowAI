@@ -5,7 +5,7 @@ from rq import Queue
 
 from app.config import settings
 
-QUEUE_NAME = "incidents"
+QUEUE_NAME = settings.queue_name
 _CONNECTION: Redis | None = None
 
 def get_connection() -> Redis:
@@ -27,6 +27,6 @@ def enqueue_incident(alert_signature: str, payload: dict):
         payload,
         job_id=job_id,
         job_timeout=settings.worker_job_timeout_seconds,
-        result_ttl=300,
-        failure_ttl=300,
+        result_ttl=settings.queue_result_ttl_seconds,
+        failure_ttl=settings.queue_failure_ttl_seconds,
     )

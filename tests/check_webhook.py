@@ -20,7 +20,10 @@ ALERT = {
 def main() -> None:
     body = json.dumps(ALERT).encode("utf-8")
     secret = settings.webhook_secret
-    headers = {"Content-Type": "application/json", "X-Signature": sign_payload(secret, body)}
+    headers = {
+        "Content-Type": "application/json",
+        settings.webhook_signature_header: sign_payload(secret, body),
+    }
 
     with TestClient(app) as client:
         ok = client.post("/api/v1/webhooks/alert", content=body, headers=headers)

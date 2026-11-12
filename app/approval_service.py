@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from langgraph.types import Command
 
-from db.models import Incident
+from db.models import AuditLog, Incident, Tenant
 from db.session import SessionLocal
 from observability.logging import get_logger
 
@@ -37,6 +37,22 @@ def resume_incident(*, thread_id: str, approved: bool, approver: str, graph=None
             ).scalar_one_or_none()
             if incident is not None:
                 incident.status = "approved" if approved else "rejected"
+                if session.get(Tenant, incident.tenant_id) is not None:
+                    session.add(
+                        AuditLog(
+                            tenant_id=incident.tenant_id,
+                            incident_id=incident.incident_id,
+                            action=(
+                                "approval.approve" if approved else "approval.reject"
+                            ),
+                            actor=approver or "api",
+                            details={
+                                "thread_id": thread_id,
+                                "approved": approved,
+                                "approver": approver,
+                            },
+                        )
+                    )
                 session.commit()
     except Exception:
         pass
