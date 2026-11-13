@@ -424,6 +424,25 @@ Run:
 - Baseline tests pass.
 - `CODE_FIX_ENABLED=false` is committed.
 
+**Provisioning artifacts created for this phase**
+
+- `deploy/aws/README.md` — run order, cost warning, prerequisites
+- `deploy/aws/00-preflight.sh` — identity and permission checks
+- `deploy/aws/01-network.sh` — VPC, subnets, NAT, SGs, endpoints
+- `deploy/aws/02-sqs.sh` — alerts/GitHub/deployment queues + DLQs
+- `deploy/aws/03-iam.sh` — ECS and Lambda roles
+- `deploy/aws/04-lambda.sh` — CloudWatch forwarder + subscription filter
+- `deploy/aws/05-rds-redis.sh` — RDS, ElastiCache, connection secrets
+- `deploy/aws/06-ecr-ecs.sh` — ECR, ECS cluster, log groups
+- `deploy/aws/07-alb-acm-route53.sh` — ALB, ACM, optional Route53
+- `deploy/aws/08-eventbridge.sh` — ECS deployment event routing
+- `deploy/aws/09-app-secrets.sh` — Resend and GitHub App secrets
+- `deploy/aws/10-github-oidc.sh` — GitHub Actions OIDC deploy roles
+- `deploy/aws/10-outputs.sh` — non-secret environment output
+- `deploy/aws/99-teardown.sh` — guarded destructive teardown
+- `lambda/cloudwatch_forwarder/handler.py` — real CloudWatch→SQS forwarder
+- `docs/PHASE_1_TASK_1_JSON_LOGGING.md` — target-service logging task
+
 ---
 
 ### Phase 1 — Real target service, ECS deployment, structured logs, CloudWatch (3–4 days)

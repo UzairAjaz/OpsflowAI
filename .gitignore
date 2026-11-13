@@ -21,3 +21,9 @@ reports/
 
 .vscode/
 .idea/
+
+# AWS provisioning state and generated secrets/config
+deploy/aws/config.env
+deploy/aws/outputs/
+deploy/aws/.tmp/
+lambda/cloudwatch_forwarder/function.zip
