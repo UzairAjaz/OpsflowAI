@@ -19,7 +19,7 @@ Approval: GitHub Draft PR + human review/merge; no auto-merge
 | Legacy RQ | Kept for existing infrastructure-remediation paths; not used for code fixes |
 | Target service | One real Python/FastAPI service in a real GitHub repo |
 | Code retrieval | GitHub Contents/Git Data API at the deployed `commit_sha` |
-| LLM | Local Ollama `qwen2.5-coder:1.5b`, 1 concurrent fix, CPU |
+| LLM | Local Ollama `qwen2.5-coder:3b`, 1 concurrent fix, CPU |
 | GitHub auth | GitHub App installation token, not a PAT |
 | PR mode | Draft PR only; bot cannot merge |
 | CI | GitHub Actions, required checks `test` and `lint` |
@@ -43,7 +43,7 @@ Production service (ECS Fargate)
                            ├─ ingest incident (Postgres)
                            ├─ resolve repo mapping (tenant + service)
                            ├─ fetch code at commit_sha (GitHub App)
-                           ├─ generate patch (Ollama qwen2.5-coder:1.5b)
+                           ├─ generate patch (Ollama qwen2.5-coder:3b)
                            ├─ validate patch (git apply, lint, secret scan)
                            ├─ push branch + open Draft PR
                            └─ wait for CI (LangGraph interrupt)
@@ -138,7 +138,7 @@ code_fix_enabled: bool = Field(default=False)
 code_fix_analysis_only: bool = Field(default=True)
 code_fix_max_concurrent: int = Field(default=1)
 code_fix_max_attempts: int = Field(default=2)
-ollama_code_model: str = Field(default="qwen2.5-coder:1.5b")
+ollama_code_model: str = Field(default="qwen2.5-coder:3b")
 ollama_code_num_ctx: int = Field(default=8192)
 ollama_code_num_predict: int = Field(default=1200)
 ollama_code_timeout_seconds: int = Field(default=600)
@@ -165,7 +165,7 @@ GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVA
 GITHUB_WEBHOOK_SECRET=replace-with-32-byte-random-secret
 GITHUB_API_URL=https://api.github.com
 
-OLLAMA_CODE_MODEL=qwen2.5-coder:1.5b
+OLLAMA_CODE_MODEL=qwen2.5-coder:3b
 OLLAMA_BASE_URL=http://localhost:11434
 CODE_FIX_ENABLED=true
 CODE_FIX_ANALYSIS_ONLY=true
@@ -823,7 +823,7 @@ Run:
     - EFS access point for `/root/.ollama`.
     - `OLLAMA_NUM_PARALLEL=1`, `OLLAMA_MAX_LOADED_MODELS=1`, `OLLAMA_KEEP_ALIVE=-1`.
     - Cloud Map service `ollama.opsflow.local` port 11434.
-    - Init container or startup command pulls `qwen2.5-coder:1.5b`.
+    - Init container or startup command pulls `qwen2.5-coder:3b`.
 27. Create Cloud Map private DNS namespace `opsflow.local` and service `ollama`.
 28. Run migrations as a one-off ECS task:
     ```bash
@@ -1050,7 +1050,7 @@ Run:
 
 1. On the dev laptop:
    ```powershell
-   ollama pull qwen2.5-coder:1.5b
+   ollama pull qwen2.5-coder:3b
    $env:OLLAMA_NUM_PARALLEL="1"
    $env:OLLAMA_MAX_LOADED_MODELS="1"
    $env:OLLAMA_KEEP_ALIVE="10m"
@@ -1058,7 +1058,7 @@ Run:
    ```
 2. Benchmark:
    ```powershell
-   Measure-Command { ollama run qwen2.5-coder:1.5b "Return only a unified diff..." }
+   Measure-Command { ollama run qwen2.5-coder:3b "Return only a unified diff..." }
    ```
    Record tokens/sec and p95. Set `OLLAMA_CODE_TIMEOUT_SECONDS` accordingly.
 3. Add `app/code_fix/context.py`:
@@ -1139,7 +1139,7 @@ Run:
 
 **Pitfalls**
 
-- CPU-only 1.5B will be slow; keep context small and prompt strict.
+- CPU-only `qwen2.5-coder:3b` is significantly slower than 1.5B; benchmark early on the actual i5-10210U (4C/8T). Keep context small, cap output tokens, and be prepared to reduce the SLO or move Ollama to a GPU/EC2 host if p95 exceeds 15 minutes.
 - Models often wrap diffs in Markdown fences; strip fences and validate schema.
 - Hallucinated file paths must be rejected before applying.
 - Tree-sitter node positions are 0-based; convert to 1-based carefully.
