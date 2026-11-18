@@ -228,23 +228,28 @@ or API Gateway is allowed. Therefore:
 |---|---|---|
 | **Phase 0** — Git safety, CODEOWNERS, kill switch | ✅ COMPLETE | Branch protection, CODEOWNERS, baseline tag, kill switch |
 | **Phase 1A** — Retriva-AI observability, JSON logging, `/debug/boom` | ✅ COMPLETE & MERGED | PR #1 merged; CI `test` + `lint` passed |
-| **Phase 1B** — AWS deployment | 🔄 IN PROGRESS | Updating to minimal zero-cost stack in `eu-north-1`; no ECS/RDS/ALB |
+| **Phase 1B** — AWS deployment | ✅ COMPLETE | Minimal zero-cost stack in `eu-north-1`; real `/debug/boom` → CloudWatch → Lambda → SQS verified |
 | **Phase 2** — OpsFlow Bot Core | ⏳ PENDING | Will run locally, consuming from real AWS SQS |
 | **Phase 3 & Beyond** — validation, CI polling, verification, revert | ⏳ PENDING | Local-first; no paid AWS compute |
 
 ### Phase 1B scope — minimal zero-cost AWS messaging stack
 
-- [ ] Set AWS region to `eu-north-1`.
-- [ ] Confirm the IAM principal can create only CloudWatch Logs, Lambda, and SQS.
-- [ ] Create `/opsflow/retriva-api` log group with 1-day retention.
-- [ ] Create `opsflow-alerts` and `opsflow-alerts-dlq`.
-- [ ] Create Lambda `opsflow-cloudwatch-forwarder` (128 MB, 30 s, concurrency 1).
-- [ ] Grant Lambda `sqs:SendMessage`.
-- [ ] Add the CloudWatch subscription filter for ERROR/CRITICAL.
-- [ ] Add a local Retriva log shipper to CloudWatch.
-- [ ] Run Retriva locally with `ENABLE_TEST_BUG=true`.
-- [ ] Trigger `/debug/boom` and verify one real SQS message.
-- [ ] Confirm AWS Billing is still $0.00.
+- [x] Set AWS region to `eu-north-1`.
+- [x] Confirm the IAM principal can create only CloudWatch Logs, Lambda, and SQS.
+- [x] Create `/opsflow/retriva-api` log group with 1-day retention.
+- [x] Create `opsflow-alerts` and `opsflow-alerts-dlq`.
+- [x] Create Lambda `opsflow-cloudwatch-forwarder` (128 MB, 30 s).
+- [x] Grant Lambda `sqs:SendMessage`.
+- [x] Add the CloudWatch subscription filter for ERROR/CRITICAL.
+- [x] Add a local Retriva Watchtower shipper to CloudWatch.
+- [x] Run Retriva locally with `ENABLE_TEST_BUG=true`.
+- [x] Trigger `/debug/boom` and verify one real SQS message.
+- [ ] Manual AWS Billing review confirms $0.00.
+
+**Verified result:** the real SQS message contained `tenant=retriva`,
+`service=retriva-api`, `environment=local`, `commit=c736b10`,
+`error_class=KeyError`, `file=api_server.py`, `line=534`,
+`request_id` and `trace_id` populated, and `analysis_only=false`.
 
 ### Phase 2 scope — local OpsFlow Bot Core
 

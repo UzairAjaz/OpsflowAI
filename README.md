@@ -20,7 +20,7 @@ cache, and LLM run locally.
 |---|---|---|
 | **Phase 0** — Git safety, CODEOWNERS, kill switch | ✅ COMPLETE | Branch protection, CODEOWNERS, baseline tag, kill switch |
 | **Phase 1A** — Retriva-AI observability, JSON logging, `/debug/boom` | ✅ COMPLETE & MERGED | PR [#1](https://github.com/UzairAjaz/Retriva-AI/pull/1); CI `test` + `lint` passed |
-| **Phase 1B** — AWS deployment | 🔄 IN PROGRESS | Updating to minimal zero-cost stack in `eu-north-1` |
+| **Phase 1B** — AWS deployment | ✅ COMPLETE | Zero-cost stack in `eu-north-1`; real CloudWatch → Lambda → SQS message verified |
 | **Phase 2** — OpsFlow Bot Core | ⏳ PENDING | Will run locally, consuming from real AWS SQS |
 | **Phase 3 & Beyond** — validation, CI polling, verification, revert | ⏳ PENDING | Local-first; no paid AWS compute |
 

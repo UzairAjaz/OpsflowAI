@@ -72,7 +72,9 @@ def _stack_location(record: dict[str, Any]) -> tuple[str, int]:
     return "", 0
 
 
-def _service_name(log_group: str) -> str:
+def _service_name(record: dict[str, Any], log_group: str) -> str:
+    if record.get("service"):
+        return str(record["service"])
     if SERVICE_NAME:
         return SERVICE_NAME
     if log_group in SERVICE_LOG_GROUP_MAP:
@@ -105,6 +107,8 @@ def build_alert_message(
         or ""
     ).strip()
     tenant_id = str(record.get("tenant_id") or DEFAULT_TENANT_ID)
+    environment = str(record.get("environment") or ENVIRONMENT)
+    request_id = str(record.get("request_id") or "")
     trace_id = str(
         record.get("trace_id")
         or record.get("request_id")
@@ -137,7 +141,7 @@ def build_alert_message(
         "source": "cloudwatch",
         "tenant_id": tenant_id,
         "service": service,
-        "environment": ENVIRONMENT,
+        "environment": environment,
         "log_group": payload.get("logGroup", ""),
         "log_stream": payload.get("logStream", ""),
         "event_id": str(log_event.get("id") or ""),
@@ -151,6 +155,7 @@ def build_alert_message(
         "file": file_path,
         "line": line_number,
         "trace_id": trace_id,
+        "request_id": request_id,
         "fingerprint": fingerprint,
         "dedupe_key": dedupe_key,
         "analysis_only": not bool(commit_sha),
@@ -163,6 +168,8 @@ def _message_attributes(message: dict[str, Any]) -> dict[str, dict[str, str]]:
         "tenant_id": str(message["tenant_id"]),
         "service": str(message["service"]),
         "severity": str(message["level"]),
+        "environment": str(message["environment"]),
+        "analysis_only": str(message["analysis_only"]).lower(),
     }
     if message["commit_sha"]:
         attributes["commit_sha"] = str(message["commit_sha"])
@@ -201,7 +208,6 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         return {"forwarded": 0, "reason": "control_message"}
 
     log_group = str(payload.get("logGroup", ""))
-    service = _service_name(log_group)
     messages: list[dict[str, Any]] = []
 
     for log_event in payload.get("logEvents", []):
@@ -213,6 +219,7 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         if not isinstance(record, dict) or not should_forward(record):
             continue
 
+        service = _service_name(record, log_group)
         message = build_alert_message(record, payload, log_event, service)
         body_size = len(json.dumps(message).encode("utf-8"))
         if body_size > _MAX_BODY_BYTES:

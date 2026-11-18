@@ -26,4 +26,7 @@ reports/
 deploy/aws/config.env
 deploy/aws/outputs/
 deploy/aws/.tmp/
+deploy/aws-zero-cost/config.env
+deploy/aws-zero-cost/outputs/
+deploy/aws-zero-cost/.tmp/
 lambda/cloudwatch_forwarder/function.zip
