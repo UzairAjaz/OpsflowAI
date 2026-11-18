@@ -1,5 +1,15 @@
 # OpsFlow AI — Phase 3: GitOps Code Remediation
 
+> **SUPERSEDED 2026-11-18 by [`PLAN.md`](../PLAN.md).**
+>
+> The AWS architecture in this document (ECS/Fargate, RDS, ElastiCache, ALB,
+> NAT, Secrets Manager, EventBridge, `ap-southeast-2`) is **not approved** for
+> the current paid AWS account.
+>
+> Zero-cost mode allows **only CloudWatch Logs, Lambda, and SQS in
+> `eu-north-1`**. Retriva-AI and OpsFlow run locally. Do not provision the paid
+> stack described below. Use `PLAN.md` as the authoritative source.
+
 **Implementation plan for real AWS + real GitHub, one Python/FastAPI service, no mocks.**
 
 Status: execution plan  
@@ -439,6 +449,7 @@ Run:
 - `deploy/aws/09-app-secrets.sh` — Resend and GitHub App secrets
 - `deploy/aws/10-github-oidc.sh` — GitHub Actions OIDC deploy roles
 - `deploy/aws/10-outputs.sh` — non-secret environment output
+- `deploy/aws/11-budget.sh` — monthly budget with 50/80/100% alerts
 - `deploy/aws/99-teardown.sh` — guarded destructive teardown
 - `lambda/cloudwatch_forwarder/handler.py` — real CloudWatch→SQS forwarder
 - `docs/PHASE_1_TASK_1_JSON_LOGGING.md` — target-service logging task

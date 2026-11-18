@@ -1,8 +1,17 @@
 # Phase 1, Task 1 — Structured JSON Logging and `/debug/boom`
 
-Target repo: `UzairAjaz/mediconnnect`  
-Target service: `mediconnect-backend`  
-Environment: staging  
+> **Updated 2026-11-18:** the target is now `UzairAjaz/Retriva-AI` and the
+> service runs locally. The ECS task-definition deployment steps in this
+> document are superseded by the zero-cost local deployment in
+> [`../PLAN.md`](../PLAN.md). The logging and `/debug/boom` requirements remain
+> valid.
+
+Target repo: `UzairAjaz/Retriva-AI`
+
+Target service: `retriva-api`
+
+Environment: local/staging
+
 Goal: emit real CloudWatch JSON logs containing the deployed `commit_sha`, then
 produce one safe, real error that the OpsFlow pipeline can ingest.
 
