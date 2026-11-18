@@ -26,6 +26,16 @@ def handle_message(message: dict) -> None:
             service=alert.service,
             thread_id=result.thread_id,
         ).info("code fix disabled; incident stored analysis-only")
+    elif not result.analysis_only:
+        from app.code_fix.runner import run_code_fix
+
+        fix_result = run_code_fix(result.incident_id)
+        log.bind(
+            tenant_id=alert.tenant_id,
+            service=alert.service,
+            thread_id=result.thread_id,
+            fix_status=fix_result.get("status"),
+        ).info("code fix run completed")
 
     log.bind(
         tenant_id=alert.tenant_id,

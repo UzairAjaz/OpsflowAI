@@ -53,6 +53,21 @@ class Settings(BaseSettings):
     sqs_max_messages: int = Field(default=1)
     sqs_heartbeat_seconds: int = Field(default=120)
 
+    # GitHub App / local code-fix execution
+    github_app_id: int = Field(default=0)
+    github_installation_id: int = Field(default=0)
+    github_app_private_key_path: str = Field(default="")
+    github_repo: str = Field(default="UzairAjaz/Retriva-AI")
+    github_base_branch: str = Field(default="main")
+    github_api_url: str = Field(default="https://api.github.com")
+    github_max_files: int = Field(default=3)
+    github_max_diff_lines: int = Field(default=200)
+    github_denied_paths: str = Field(
+        default=".github/workflows/,migrations/,alembic/,auth/,payments/"
+    )
+    ollama_code_model: str = Field(default="qwen2.5-coder:3b")
+    ollama_code_timeout_seconds: int = Field(default=900)
+
     api_host: str = Field(default="0.0.0.0")
     api_port: int = Field(default=8000)
 

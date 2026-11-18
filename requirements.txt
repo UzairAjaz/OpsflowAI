@@ -22,7 +22,7 @@ pgvector>=0.3
 fastapi>=0.115
 uvicorn>=0.30
 loguru>=0.7
-PyJWT>=2.8
+PyJWT[crypto]>=2.8
 
 # Phase 2: cache and rate limiting
 redis>=5

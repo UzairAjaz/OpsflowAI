@@ -230,7 +230,7 @@ or API Gateway is allowed. Therefore:
 | **Phase 1A** — Retriva-AI observability, JSON logging, `/debug/boom` | ✅ COMPLETE & MERGED | PR #1 merged; CI `test` + `lint` passed |
 | **Phase 1B** — AWS deployment | ✅ COMPLETE | Minimal zero-cost stack in `eu-north-1`; real `/debug/boom` → CloudWatch → Lambda → SQS verified |
 | **Phase 2A** — SQS ingestion and local state | ✅ COMPLETE | Local consumer, Postgres incident store, Retriva mapping, kill switch; real message verified |
-| **Phase 2B** — Code-fix vertical slice | ⏳ PENDING | GitHub App, code fetch, Ollama patch, validation, Draft PR, CI polling |
+| **Phase 2B** — Code-fix vertical slice | ✅ COMPLETE | GitHub App fetch, Ollama patch, validation, Draft PR #3, CI passed |
 | **Phase 3 & Beyond** — verification, revert, hardening | ⏳ PENDING | Local-first; no paid AWS compute |
 
 ### Phase 1B scope — minimal zero-cost AWS messaging stack
@@ -268,13 +268,21 @@ saved as incident `ae1ee382-7d84-4b16-92d1-052ffef0977c`, normalized to
 
 ### Phase 2B scope — code-fix vertical slice
 
-- [ ] Local GitHub App authentication.
-- [ ] Code fetch at `commit_sha`.
-- [ ] Local Ollama `qwen2.5-coder:3b`.
-- [ ] Patch generation and local validation.
-- [ ] Draft PR creation.
-- [ ] CI status polling via GitHub API.
-- [ ] Local reports and notifications.
+- [x] Local GitHub App authentication.
+- [x] Code fetch at `commit_sha`.
+- [x] Local Ollama `qwen2.5-coder:3b`.
+- [x] Patch generation and local validation.
+- [x] Draft PR creation.
+- [x] CI status polling via GitHub API.
+- [ ] Local reports and notifications (deferred to Phase 3).
+
+**Verified result:** Retriva `KeyError` → qwen patch → `api_server.py`
+validation → Draft PR
+[#3](https://github.com/UzairAjaz/Retriva-AI/pull/3) with `test` and `lint`
+green. The PR is Draft and blocked by review, as intended.
+
+Because PR #2 is still open, PR #3 includes the Phase 1B shipper commit.
+Clean up the branch history after PR #2 is reviewed.
 
 ### Phase 3+ scope
 

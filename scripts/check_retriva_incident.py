@@ -32,12 +32,21 @@ def main() -> None:
             "environment": incident.environment,
             "commit_sha": incident.commit_sha,
             "error_class": incident.error_class,
+            "error_message": incident.error_message,
             "file_path": incident.file_path,
             "line_number": incident.line_number,
             "analysis_only": incident.analysis_only,
             "trace_id": incident.trace_id,
             "request_id": incident.request_id,
             "dedupe_key": incident.dedupe_key,
+            "fix_status": incident.fix_status,
+            "fix_error": incident.fix_error,
+            "branch_name": incident.branch_name,
+            "pr_number": incident.pr_number,
+            "pr_url": incident.pr_url,
+            "pr_state": incident.pr_state,
+            "ci_status": incident.ci_status,
+            "model_name": incident.model_name,
             "repository_mapping_id": (
                 str(incident.repository_mapping_id)
                 if incident.repository_mapping_id

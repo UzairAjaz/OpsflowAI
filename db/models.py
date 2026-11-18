@@ -276,6 +276,8 @@ class Incident(Base):
         String(64), nullable=False, server_default="default", index=True
     )
     error_class: Mapped[str | None] = mapped_column(String(128))
+    error_message: Mapped[str | None] = mapped_column(Text)
+    stack_trace: Mapped[str | None] = mapped_column(Text)
     severity: Mapped[str] = mapped_column(String(16), nullable=False, default="info")
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
     environment: Mapped[str | None] = mapped_column(String(32))
@@ -296,6 +298,15 @@ class Incident(Base):
         ForeignKey("repository_mappings.mapping_id", ondelete="SET NULL"),
         nullable=True,
     )
+    fix_status: Mapped[str | None] = mapped_column(String(32))
+    fix_error: Mapped[str | None] = mapped_column(Text)
+    branch_name: Mapped[str | None] = mapped_column(String(255))
+    pr_number: Mapped[int | None] = mapped_column(Integer)
+    pr_url: Mapped[str | None] = mapped_column(String(512))
+    pr_state: Mapped[str | None] = mapped_column(String(32))
+    patch_diff: Mapped[str | None] = mapped_column(Text)
+    model_name: Mapped[str | None] = mapped_column(String(128))
+    ci_status: Mapped[str | None] = mapped_column(String(32))
     approval_requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     escalated_level: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     created_at: Mapped[datetime] = mapped_column(

@@ -22,7 +22,7 @@ cache, and LLM run locally.
 | **Phase 1A** — Retriva-AI observability, JSON logging, `/debug/boom` | ✅ COMPLETE & MERGED | PR [#1](https://github.com/UzairAjaz/Retriva-AI/pull/1); CI `test` + `lint` passed |
 | **Phase 1B** — AWS deployment | ✅ COMPLETE | Zero-cost stack in `eu-north-1`; real CloudWatch → Lambda → SQS message verified |
 | **Phase 2A** — SQS ingestion and local state | ✅ COMPLETE | Local consumer, Postgres incidents, Retriva mapping, kill switch |
-| **Phase 2B** — Code-fix vertical slice | ⏳ PENDING | GitHub App, code fetch, Ollama patch, validation, Draft PR |
+| **Phase 2B** — Code-fix vertical slice | ✅ COMPLETE | Ollama patch, validation, Draft PR #3, CI passed |
 | **Phase 3 & Beyond** — verification, revert, hardening | ⏳ PENDING | Local-first; no paid AWS compute |
 
 ---
@@ -153,6 +153,27 @@ docker compose up -d postgres redis
 
 With `CODE_FIX_ENABLED=false`, incidents are stored with
 `status=analysis_only`; no GitHub or LLM calls are made.
+
+### Phase 2B local code fix
+
+Enable the local fix path only for a controlled test:
+
+```powershell
+$env:CODE_FIX_ENABLED="true"
+$env:CODE_FIX_ANALYSIS_ONLY="false"
+.\.venv\Scripts\python.exe -m app.code_fix.runner <incident-id>
+```
+
+The runner:
+
+1. Fetches the file at the incident `commit_sha` through the GitHub App.
+2. Generates a minimal patch with `qwen2.5-coder:3b`.
+3. Validates with `git apply`, Python compile, Ruff, and a secret scan.
+4. Commits to an `opsflow/fix-*` branch.
+5. Opens a **Draft** PR against `main`.
+6. Polls `test` and `lint` checks.
+
+It never merges. PR #3 is the first real vertical-slice result.
 
 ### Retriva target service
 

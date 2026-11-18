@@ -128,6 +128,8 @@ def ingest_code_alert(session: Session, alert: CodeAlertMessage) -> CodeIngestRe
             service=alert.service,
             tenant_id=alert.tenant_id,
             error_class=alert.error_class or None,
+            error_message=alert.message or None,
+            stack_trace=alert.stack_trace or None,
             severity=alert.severity,
             status=status,
             environment=alert.environment,
