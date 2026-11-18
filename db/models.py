@@ -219,6 +219,49 @@ class ProcessedAlert(Base):
         UUID(as_uuid=True), ForeignKey("incidents.incident_id"), nullable=True
     )
 
+class RepositoryMapping(Base):
+
+    __tablename__ = "repository_mappings"
+
+    mapping_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    tenant_id: Mapped[str] = mapped_column(
+        String(64),
+        ForeignKey("tenants.tenant_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    service: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    repo_full_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    repo_path: Mapped[str] = mapped_column(
+        String(255), nullable=False, default="", server_default=""
+    )
+    local_repo_root: Mapped[str | None] = mapped_column(String(512))
+    language: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="python", server_default="python"
+    )
+    base_branch: Mapped[str] = mapped_column(
+        String(64), nullable=False, default="main", server_default="main"
+    )
+    log_group: Mapped[str | None] = mapped_column(String(255))
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default="true"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "service", name="uq_repository_mappings_tenant_service"),
+    )
+
 class Incident(Base):
 
     __tablename__ = "incidents"
@@ -235,6 +278,24 @@ class Incident(Base):
     error_class: Mapped[str | None] = mapped_column(String(128))
     severity: Mapped[str] = mapped_column(String(16), nullable=False, default="info")
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
+    environment: Mapped[str | None] = mapped_column(String(32))
+    commit_sha: Mapped[str | None] = mapped_column(String(40))
+    log_group: Mapped[str | None] = mapped_column(String(255))
+    log_stream: Mapped[str | None] = mapped_column(String(255))
+    trace_id: Mapped[str | None] = mapped_column(String(128))
+    request_id: Mapped[str | None] = mapped_column(String(128))
+    file_path: Mapped[str | None] = mapped_column(String(512))
+    line_number: Mapped[int | None] = mapped_column(Integer)
+    analysis_only: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
+    error_fingerprint: Mapped[str | None] = mapped_column(Text)
+    dedupe_key: Mapped[str | None] = mapped_column(String(64), index=True)
+    repository_mapping_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("repository_mappings.mapping_id", ondelete="SET NULL"),
+        nullable=True,
+    )
     approval_requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     escalated_level: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     created_at: Mapped[datetime] = mapped_column(

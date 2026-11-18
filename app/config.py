@@ -44,6 +44,15 @@ class Settings(BaseSettings):
     code_fix_analysis_only: bool = Field(default=True)
     checkpoint_db: str = Field(default="opsflow.sqlite")
 
+    # Zero-cost local SQS ingestion
+    aws_profile: str = Field(default="default")
+    aws_region: str = Field(default="eu-north-1")
+    sqs_alert_queue_url: str = Field(default="")
+    sqs_wait_time_seconds: int = Field(default=20)
+    sqs_visibility_timeout_seconds: int = Field(default=900)
+    sqs_max_messages: int = Field(default=1)
+    sqs_heartbeat_seconds: int = Field(default=120)
+
     api_host: str = Field(default="0.0.0.0")
     api_port: int = Field(default=8000)
 

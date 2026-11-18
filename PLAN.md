@@ -229,8 +229,9 @@ or API Gateway is allowed. Therefore:
 | **Phase 0** — Git safety, CODEOWNERS, kill switch | ✅ COMPLETE | Branch protection, CODEOWNERS, baseline tag, kill switch |
 | **Phase 1A** — Retriva-AI observability, JSON logging, `/debug/boom` | ✅ COMPLETE & MERGED | PR #1 merged; CI `test` + `lint` passed |
 | **Phase 1B** — AWS deployment | ✅ COMPLETE | Minimal zero-cost stack in `eu-north-1`; real `/debug/boom` → CloudWatch → Lambda → SQS verified |
-| **Phase 2** — OpsFlow Bot Core | ⏳ PENDING | Will run locally, consuming from real AWS SQS |
-| **Phase 3 & Beyond** — validation, CI polling, verification, revert | ⏳ PENDING | Local-first; no paid AWS compute |
+| **Phase 2A** — SQS ingestion and local state | ✅ COMPLETE | Local consumer, Postgres incident store, Retriva mapping, kill switch; real message verified |
+| **Phase 2B** — Code-fix vertical slice | ⏳ PENDING | GitHub App, code fetch, Ollama patch, validation, Draft PR, CI polling |
+| **Phase 3 & Beyond** — verification, revert, hardening | ⏳ PENDING | Local-first; no paid AWS compute |
 
 ### Phase 1B scope — minimal zero-cost AWS messaging stack
 
@@ -251,14 +252,25 @@ or API Gateway is allowed. Therefore:
 `error_class=KeyError`, `file=api_server.py`, `line=534`,
 `request_id` and `trace_id` populated, and `analysis_only=false`.
 
-### Phase 2 scope — local OpsFlow Bot Core
+### Phase 2A scope — SQS ingestion and local state
 
-- [ ] SQS long-poll consumer (`worker/consumers/alert_consumer.py`).
-- [ ] Local incident store (SQLite first, Postgres optional).
-- [ ] Tenant and repository mapping.
+- [x] SQS long-poll consumer (`worker/consumers/alert_consumer.py`).
+- [x] Local Postgres incident store.
+- [x] Tenant and repository mapping for `retriva`.
+- [x] Windows path normalization to repo-relative paths.
+- [x] Kill switch respected: incidents stored `analysis_only` while `CODE_FIX_ENABLED=false`.
+- [x] Idempotent duplicate handling via `dedupe_key`.
+
+**Verified result:** a real `/debug/boom` message was consumed from SQS,
+saved as incident `ae1ee382-7d84-4b16-92d1-052ffef0977c`, normalized to
+`api_server.py:534`, and a second delivery reused the same incident with
+`processed_alerts.count=2`.
+
+### Phase 2B scope — code-fix vertical slice
+
 - [ ] Local GitHub App authentication.
+- [ ] Code fetch at `commit_sha`.
 - [ ] Local Ollama `qwen2.5-coder:3b`.
-- [ ] Code context fetch at `commit_sha`.
 - [ ] Patch generation and local validation.
 - [ ] Draft PR creation.
 - [ ] CI status polling via GitHub API.

@@ -22,6 +22,10 @@ reports/
 .vscode/
 .idea/
 
+# Local GitHub App / private keys
+*.pem
+*.key
+
 # AWS provisioning state and generated secrets/config
 deploy/aws/config.env
 deploy/aws/outputs/

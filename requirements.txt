@@ -30,6 +30,9 @@ redis>=5
 # Phase 2: HTTP clients (knowledge adapters)
 httpx>=0.27
 
+# Zero-cost SQS ingestion
+boto3>=1.34
+
 # Phase 2: background job queue
 rq>=2.0
 

@@ -21,8 +21,9 @@ cache, and LLM run locally.
 | **Phase 0** — Git safety, CODEOWNERS, kill switch | ✅ COMPLETE | Branch protection, CODEOWNERS, baseline tag, kill switch |
 | **Phase 1A** — Retriva-AI observability, JSON logging, `/debug/boom` | ✅ COMPLETE & MERGED | PR [#1](https://github.com/UzairAjaz/Retriva-AI/pull/1); CI `test` + `lint` passed |
 | **Phase 1B** — AWS deployment | ✅ COMPLETE | Zero-cost stack in `eu-north-1`; real CloudWatch → Lambda → SQS message verified |
-| **Phase 2** — OpsFlow Bot Core | ⏳ PENDING | Will run locally, consuming from real AWS SQS |
-| **Phase 3 & Beyond** — validation, CI polling, verification, revert | ⏳ PENDING | Local-first; no paid AWS compute |
+| **Phase 2A** — SQS ingestion and local state | ✅ COMPLETE | Local consumer, Postgres incidents, Retriva mapping, kill switch |
+| **Phase 2B** — Code-fix vertical slice | ⏳ PENDING | GitHub App, code fetch, Ollama patch, validation, Draft PR |
+| **Phase 3 & Beyond** — verification, revert, hardening | ⏳ PENDING | Local-first; no paid AWS compute |
 
 ---
 
@@ -129,12 +130,29 @@ python -m venv .venv
 Copy-Item .env.example .env
 ```
 
-Run the local API/worker once Phase 2 is implemented:
+Run the local API/worker once Phase 2B is implemented:
 
 ```powershell
 .\.venv\Scripts\python.exe -m uvicorn api.main:app --host 127.0.0.1 --port 8000
 .\.venv\Scripts\python.exe -m worker.consumers.alert_consumer
 ```
+
+### Phase 2A local ingestion
+
+```powershell
+docker compose up -d postgres redis
+.\.venv\Scripts\python.exe -m alembic upgrade head
+.\.venv\Scripts\python.exe -m scripts.seed_retriva
+
+# Process one real SQS alert and exit
+.\.venv\Scripts\python.exe -m worker.consumers.alert_consumer --once
+
+# Verify the latest local incident
+.\.venv\Scripts\python.exe -m scripts.check_retriva_incident
+```
+
+With `CODE_FIX_ENABLED=false`, incidents are stored with
+`status=analysis_only`; no GitHub or LLM calls are made.
 
 ### Retriva target service
 
