@@ -44,7 +44,7 @@ if [[ -n "$DOMAIN_NAME" ]]; then
       printf '%s' "$change_batch" > "$tmp"
       "${AWS[@]}" route53 change-resource-record-sets \
         --hosted-zone-id "$HOSTED_ZONE_ID" \
-        --change-batch "file://$tmp" >/dev/null
+        --change-batch "$(file_url "$tmp")" >/dev/null
       log "created ACM DNS validation record: $validation_name"
     fi
 
@@ -150,7 +150,7 @@ if [[ -n "$DOMAIN_NAME" && -n "$HOSTED_ZONE_ID" && -n "$CERT_ARN" ]]; then
   printf '%s' "$change_batch" > "$tmp"
   "${AWS[@]}" route53 change-resource-record-sets \
     --hosted-zone-id "$HOSTED_ZONE_ID" \
-    --change-batch "file://$tmp" >/dev/null
+    --change-batch "$(file_url "$tmp")" >/dev/null
   API_BASE_URL="https://$DOMAIN_NAME"
   log "created Route53 alias: $DOMAIN_NAME"
 else

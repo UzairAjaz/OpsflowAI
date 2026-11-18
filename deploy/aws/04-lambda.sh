@@ -25,7 +25,7 @@ if "${AWS[@]}" lambda get-function --function-name "$FUNCTION_NAME" >/dev/null 2
   log "updating Lambda code: $FUNCTION_NAME"
   "${AWS[@]}" lambda update-function-code \
     --function-name "$FUNCTION_NAME" \
-    --zip-file "fileb://$ZIP_FILE" >/dev/null
+    --zip-file "$(fileb_url "$ZIP_FILE")" >/dev/null
   "${AWS[@]}" lambda update-function-configuration \
     --function-name "$FUNCTION_NAME" \
     --timeout 30 --memory-size 512 \
@@ -37,7 +37,7 @@ else
     --runtime python3.12 \
     --handler handler.handler \
     --role "$LAMBDA_ROLE_ARN" \
-    --zip-file "fileb://$ZIP_FILE" \
+    --zip-file "$(fileb_url "$ZIP_FILE")" \
     --timeout 30 --memory-size 512 \
     --architectures x86_64 \
     --environment "Variables={ALERT_QUEUE_URL=$ALERTS_QUEUE_URL,DEFAULT_TENANT_ID=$TENANT,ENVIRONMENT=$ENV,SERVICE_NAME=$TARGET_SERVICE}" >/dev/null

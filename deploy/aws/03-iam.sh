@@ -17,11 +17,11 @@ ensure_role() {
   local name="$1" trust_file="$2"
   if "${AWS[@]}" iam get-role --role-name "$name" >/dev/null 2>&1; then
     "${AWS[@]}" iam update-assume-role-policy \
-      --role-name "$name" --policy-document "file://$trust_file" >/dev/null
+      --role-name "$name" --policy-document "$(file_url "$trust_file")" >/dev/null
     log "role exists: $name"
   else
     "${AWS[@]}" iam create-role \
-      --role-name "$name" --assume-role-policy-document "file://$trust_file" >/dev/null
+      --role-name "$name" --assume-role-policy-document "$(file_url "$trust_file")" >/dev/null
     log "created role: $name"
   fi
   "${AWS[@]}" iam get-role --role-name "$name" --query 'Role.Arn' --output text

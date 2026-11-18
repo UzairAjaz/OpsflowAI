@@ -95,9 +95,9 @@ put_secret() {
   chmod 600 "$tmp"
   printf '%s' "$value" > "$tmp"
   if "${AWS[@]}" secretsmanager describe-secret --secret-id "$name" >/dev/null 2>&1; then
-    "${AWS[@]}" secretsmanager put-secret-value --secret-id "$name" --secret-string "file://$tmp" >/dev/null
+    "${AWS[@]}" secretsmanager put-secret-value --secret-id "$name" --secret-string "$(file_url "$tmp")" >/dev/null
   else
-    "${AWS[@]}" secretsmanager create-secret --name "$name" --secret-string "file://$tmp" >/dev/null
+    "${AWS[@]}" secretsmanager create-secret --name "$name" --secret-string "$(file_url "$tmp")" >/dev/null
   fi
   rm -f "$tmp"
 }
@@ -105,6 +105,29 @@ put_secret() {
 get_secret() {
   local name="$1"
   "${AWS[@]}" secretsmanager get-secret-value --secret-id "$name" --query SecretString --output text
+}
+
+# AWS CLI on Windows needs a Windows path (file:///C:/...) while Git Bash
+# produces /c/... paths. cygpath is available in Git Bash and CloudShell is
+# already POSIX, so handle both.
+file_url() {
+  local path="$1"
+  [[ "$path" == /* ]] || path="$PWD/$path"
+  if command -v cygpath >/dev/null 2>&1; then
+    printf 'file://%s' "$(cygpath -m "$path")"
+  else
+    printf 'file://%s' "$path"
+  fi
+}
+
+fileb_url() {
+  local path="$1"
+  [[ "$path" == /* ]] || path="$PWD/$path"
+  if command -v cygpath >/dev/null 2>&1; then
+    printf 'fileb://%s' "$(cygpath -m "$path")"
+  else
+    printf 'fileb://%s' "$path"
+  fi
 }
 
 queue_url() {

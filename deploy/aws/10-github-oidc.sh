@@ -48,12 +48,12 @@ ensure_oidc_role() {
 
   if "${AWS[@]}" iam get-role --role-name "$role_name" >/dev/null 2>&1; then
     "${AWS[@]}" iam update-assume-role-policy \
-      --role-name "$role_name" --policy-document "file://$trust_file" >/dev/null
+      --role-name "$role_name" --policy-document "$(file_url "$trust_file")" >/dev/null
     log "OIDC role exists: $role_name"
   else
     "${AWS[@]}" iam create-role \
       --role-name "$role_name" \
-      --assume-role-policy-document "file://$trust_file" >/dev/null
+      --assume-role-policy-document "$(file_url "$trust_file")" >/dev/null
     log "created OIDC role: $role_name"
   fi
 

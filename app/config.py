@@ -40,6 +40,8 @@ class Settings(BaseSettings):
 
     dry_run: bool = Field(default=True)
     auto_approve: bool = Field(default=False)
+    code_fix_enabled: bool = Field(default=False)
+    code_fix_analysis_only: bool = Field(default=True)
     checkpoint_db: str = Field(default="opsflow.sqlite")
 
     api_host: str = Field(default="0.0.0.0")

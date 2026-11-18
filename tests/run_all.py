@@ -16,6 +16,7 @@ TESTS = [
     "tests.check_ratelimit",
     "tests.check_durable_checkpoint",
     "tests.check_worker",
+    "tests.check_code_fix_kill_switch",
     "tests.check_week1",
     "tests.check_kb",
     "tests.check_history",
