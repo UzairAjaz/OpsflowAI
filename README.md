@@ -22,7 +22,7 @@ cache, and LLM run locally.
 | **Phase 1A** — Retriva-AI observability, JSON logging, `/debug/boom` | ✅ COMPLETE & MERGED | PR [#1](https://github.com/UzairAjaz/Retriva-AI/pull/1); CI `test` + `lint` passed |
 | **Phase 1B** — AWS deployment | ✅ COMPLETE | Zero-cost stack in `eu-north-1`; real CloudWatch → Lambda → SQS message verified |
 | **Phase 2A** — SQS ingestion and local state | ✅ COMPLETE | Local consumer, Postgres incidents, Retriva mapping, kill switch |
-| **Phase 2B** — Code-fix vertical slice | ✅ COMPLETE | Ollama patch, validation, Draft PR #3, CI passed |
+| **Phase 2B** — Code-fix vertical slice | ✅ COMPLETE | Ollama patch, validation, Draft PR #4, CI passed |
 | **Phase 3 & Beyond** — verification, revert, hardening | ⏳ PENDING | Local-first; no paid AWS compute |
 
 ---
@@ -173,7 +173,7 @@ The runner:
 5. Opens a **Draft** PR against `main`.
 6. Polls `test` and `lint` checks.
 
-It never merges. PR #3 is the first real vertical-slice result.
+It never merges. PR #4 is the clean first vertical-slice result.
 
 ### Retriva target service
 
