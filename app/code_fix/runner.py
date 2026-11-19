@@ -12,6 +12,7 @@ from app.config import settings
 from db.models import AuditLog, Incident, RepositoryMapping, Tenant
 from db.session import SessionLocal
 from integrations.github_app import GitHubAppClient
+from integrations.notifications import send_gmail_event
 from observability.logging import get_logger
 
 log = get_logger(stage="code_fix.runner")
@@ -196,6 +197,7 @@ def run_code_fix(incident_id: uuid.UUID, *, force: bool = False) -> dict:
             incident.pr_state = pr.state
             incident.fix_status = "pr_opened"
             incident.ci_status = "pending"
+            incident.fix_commit_sha = fix_commit_sha
             _audit(
                 session,
                 incident,
@@ -208,6 +210,11 @@ def run_code_fix(incident_id: uuid.UUID, *, force: bool = False) -> dict:
                 },
             )
             session.commit()
+            send_gmail_event(
+                event="pr_created",
+                incident=incident,
+                pr_url=pr.url,
+            )
 
             checks = client.wait_for_required_checks(
                 ref=fix_commit_sha,
@@ -220,6 +227,23 @@ def run_code_fix(incident_id: uuid.UUID, *, force: bool = False) -> dict:
                 incident.status = "awaiting_review"
             elif checks["status"] == "failed":
                 incident.status = "ci_failed"
+                from app.revert.service import create_revert_pr
+
+                revert = create_revert_pr(
+                    incident.incident_id,
+                    reason="GitHub Actions CI failed on the fix PR",
+                )
+                session.refresh(incident)
+                send_gmail_event(
+                    event="regressed",
+                    incident=incident,
+                    pr_url=incident.pr_url,
+                    revert_pr_url=incident.revert_pr_url,
+                )
+                log.bind(
+                    incident_id=str(incident.incident_id),
+                    revert=revert,
+                ).info("CI failure revert flow completed")
             pr_state = client.get_pr(pr.number)
             incident.pr_state = pr_state.get("state")
             client.update_pr_body(

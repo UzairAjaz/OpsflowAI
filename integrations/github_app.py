@@ -5,9 +5,12 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 import jwt
+
+from app.config import settings
 
 
 class GitHubAppError(RuntimeError):
@@ -93,13 +96,29 @@ class GitHubAppClient:
             "X-GitHub-Api-Version": "2022-11-28",
         }
         headers.update(kwargs.pop("headers", {}))
-        with httpx.Client(timeout=30) as client:
-            response = client.request(
-                method,
-                f"{self.api_url}/repos/{self.repo}{path}",
-                headers=headers,
-                **kwargs,
-            )
+        last_error: Exception | None = None
+        response: httpx.Response | None = None
+        for attempt in range(max(1, settings.github_retry_attempts)):
+            try:
+                with httpx.Client(timeout=30) as client:
+                    response = client.request(
+                        method,
+                        f"{self.api_url}/repos/{self.repo}{path}",
+                        headers=headers,
+                        **kwargs,
+                    )
+                if response.status_code == 429 or response.status_code >= 500:
+                    last_error = GitHubAppError(
+                        f"GitHub API {method} {path} returned {response.status_code}"
+                    )
+                    time.sleep(min(2**attempt, 8))
+                    continue
+                break
+            except (httpx.HTTPError, OSError) as exc:
+                last_error = exc
+                time.sleep(min(2**attempt, 8))
+        if response is None:
+            raise GitHubAppError(f"GitHub API {method} {path} failed: {last_error}")
         if response.status_code in {401, 403} and retry_auth:
             self.installation_token(force=True)
             return self._request(
@@ -116,6 +135,10 @@ class GitHubAppClient:
 
     def get_commit(self, sha: str) -> dict[str, Any]:
         return self._request("GET", f"/commits/{sha}")
+
+    def get_branch_sha(self, branch: str) -> str:
+        data = self._request("GET", f"/branches/{quote(branch, safe='')}")
+        return data["commit"]["sha"]
 
     def get_file_at_sha(self, path: str, sha: str) -> tuple[str, str]:
         data = self._request(

@@ -3,6 +3,7 @@ from __future__ import annotations
 import difflib
 import json
 import re
+import time
 from typing import Any
 
 import httpx
@@ -121,7 +122,7 @@ def generate_patch(context: CodeContext, error: dict[str, Any]) -> CodePatch:
     url = f"{settings.ollama_base_url.rstrip('/')}/api/chat"
     last_error = ""
 
-    for attempt in range(1, 3):
+    for attempt in range(1, max(1, settings.ollama_retry_attempts) + 1):
         messages = [
             {"role": "system", "content": _system_prompt()},
             {"role": "user", "content": _user_prompt(context, error)},
@@ -172,7 +173,10 @@ def generate_patch(context: CodeContext, error: dict[str, Any]) -> CodePatch:
                 attempt=attempt,
                 error=last_error,
             ).warning("patch generation attempt failed")
+            if attempt < settings.ollama_retry_attempts:
+                time.sleep(min(2**attempt, 8))
 
     raise PatchGenerationError(
-        f"unable to generate a valid patch after 2 attempts: {last_error}"
+        f"unable to generate a valid patch after "
+        f"{settings.ollama_retry_attempts} attempts: {last_error}"
     )

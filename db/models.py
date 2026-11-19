@@ -307,6 +307,19 @@ class Incident(Base):
     patch_diff: Mapped[str | None] = mapped_column(Text)
     model_name: Mapped[str | None] = mapped_column(String(128))
     ci_status: Mapped[str | None] = mapped_column(String(32))
+    fix_commit_sha: Mapped[str | None] = mapped_column(String(40))
+    merged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    merge_commit_sha: Mapped[str | None] = mapped_column(String(40))
+    verification_status: Mapped[str | None] = mapped_column(String(32))
+    verification_started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+    verification_deadline: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+    revert_pr_number: Mapped[int | None] = mapped_column(Integer)
+    revert_pr_url: Mapped[str | None] = mapped_column(String(512))
+    revert_status: Mapped[str | None] = mapped_column(String(32))
     approval_requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     escalated_level: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     created_at: Mapped[datetime] = mapped_column(

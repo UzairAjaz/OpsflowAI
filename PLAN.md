@@ -231,7 +231,10 @@ or API Gateway is allowed. Therefore:
 | **Phase 1B** — AWS deployment | ✅ COMPLETE | Minimal zero-cost stack in `eu-north-1`; real `/debug/boom` → CloudWatch → Lambda → SQS verified |
 | **Phase 2A** — SQS ingestion and local state | ✅ COMPLETE | Local consumer, Postgres incident store, Retriva mapping, kill switch; real message verified |
 | **Phase 2B** — Code-fix vertical slice | ✅ COMPLETE | GitHub App fetch, Ollama patch, validation, Draft PR #4, CI passed |
-| **Phase 3 & Beyond** — verification, revert, hardening | ⏳ PENDING | Local-first; no paid AWS compute |
+| **Phase 3A** — Post-merge verification | ⚠️ CODE COMPLETE — LIVE TEST BLOCKED | Verification worker works; PR #4 is still OPEN, not merged |
+| **Phase 3B** — Draft revert flow | ⚠️ CODE COMPLETE — NOT EXERCISED | CI-failure and regression paths implemented; needs a real merged regression |
+| **Phase 3C** — Gmail notifications | ⚠️ CODE COMPLETE — CREDENTIALS NEEDED | `SMTP_EMAIL` / `SMTP_APP_PASSWORD` not configured |
+| **Phase 3D** — Hardening | ✅ COMPLETE | Retries, restart script, and healthcheck implemented |
 
 ### Phase 1B scope — minimal zero-cost AWS messaging stack
 
@@ -285,13 +288,22 @@ PR #3 was closed because it carried the Phase 1B shipper commit before PR #2
 merged. PR #4 is the clean recreated PR from updated `main` and contains only
 the `api_server.py` fix.
 
-### Phase 3+ scope
+### Phase 3 scope
 
-- Patch policy and secret scanning.
-- Full CI polling and merge tracking.
-- Post-merge CloudWatch verification.
-- Draft revert PR flow.
-- Evaluation, hardening, and runbooks.
+- [x] Post-merge verification worker (`app/verification/`).
+- [x] 15-minute CloudWatch or file-log verification window.
+- [x] `resolved` / `regressed` incident states.
+- [x] Draft revert PR flow (`app/revert/`).
+- [x] Gmail App Password notifications (`SMTP_EMAIL` / `SMTP_APP_PASSWORD`).
+- [x] Retries for GitHub and Ollama calls.
+- [x] `scripts/restart_retriva.ps1`.
+- [x] `scripts/healthcheck.py`.
+- [ ] Real email delivery test — needs Gmail App Password.
+- [ ] Real post-merge verification test — needs PR #4 actually merged.
+
+**Operational note:** GitHub currently reports PR #4 as `OPEN` and
+`REVIEW_REQUIRED`, not merged. The verification worker therefore returns
+`not_merged` until the PR is merged.
 
 ---
 

@@ -47,6 +47,23 @@ def main() -> None:
             "pr_state": incident.pr_state,
             "ci_status": incident.ci_status,
             "model_name": incident.model_name,
+            "fix_commit_sha": incident.fix_commit_sha,
+            "merged_at": str(incident.merged_at) if incident.merged_at else None,
+            "merge_commit_sha": incident.merge_commit_sha,
+            "verification_status": incident.verification_status,
+            "verification_started_at": (
+                str(incident.verification_started_at)
+                if incident.verification_started_at
+                else None
+            ),
+            "verification_deadline": (
+                str(incident.verification_deadline)
+                if incident.verification_deadline
+                else None
+            ),
+            "revert_pr_number": incident.revert_pr_number,
+            "revert_pr_url": incident.revert_pr_url,
+            "revert_status": incident.revert_status,
             "repository_mapping_id": (
                 str(incident.repository_mapping_id)
                 if incident.repository_mapping_id

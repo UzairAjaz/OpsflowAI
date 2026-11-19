@@ -23,7 +23,10 @@ cache, and LLM run locally.
 | **Phase 1B** — AWS deployment | ✅ COMPLETE | Zero-cost stack in `eu-north-1`; real CloudWatch → Lambda → SQS message verified |
 | **Phase 2A** — SQS ingestion and local state | ✅ COMPLETE | Local consumer, Postgres incidents, Retriva mapping, kill switch |
 | **Phase 2B** — Code-fix vertical slice | ✅ COMPLETE | Ollama patch, validation, Draft PR #4, CI passed |
-| **Phase 3 & Beyond** — verification, revert, hardening | ⏳ PENDING | Local-first; no paid AWS compute |
+| **Phase 3A** — Post-merge verification | ⚠️ CODE COMPLETE | Awaiting PR #4 merge for a live test |
+| **Phase 3B** — Draft revert flow | ⚠️ CODE COMPLETE | Implemented; needs a real regression/CI failure to exercise |
+| **Phase 3C** — Gmail notifications | ⚠️ CODE COMPLETE | `SMTP_EMAIL` / `SMTP_APP_PASSWORD` still needed |
+| **Phase 3D** — Hardening | ✅ COMPLETE | Retries, restart script, healthcheck |
 
 ---
 
@@ -174,6 +177,22 @@ The runner:
 6. Polls `test` and `lint` checks.
 
 It never merges. PR #4 is the clean first vertical-slice result.
+
+### Phase 3 verification and revert
+
+```powershell
+# Check Postgres, SQS, Ollama, GitHub App, and Gmail config
+.\.venv\Scripts\python.exe -m scripts.healthcheck
+
+# Verify all merged PRs once
+.\.venv\Scripts\python.exe -m app.verification.worker --once
+
+# Restart Retriva from main with a new commit SHA
+.\scripts\restart_retriva.ps1 -Port 8001
+
+# Send a real Gmail test notification (requires SMTP_EMAIL/SMTP_APP_PASSWORD)
+.\.venv\Scripts\python.exe -m scripts.send_test_email --event pr_created
+```
 
 ### Retriva target service
 

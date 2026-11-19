@@ -67,6 +67,20 @@ class Settings(BaseSettings):
     )
     ollama_code_model: str = Field(default="qwen2.5-coder:3b")
     ollama_code_timeout_seconds: int = Field(default=900)
+    github_retry_attempts: int = Field(default=3)
+    ollama_retry_attempts: int = Field(default=3)
+
+    # Phase 3: post-merge verification and local Gmail notifications
+    manager_email: str = Field(default="uzairejaz987@gmail.com")
+    smtp_email: str = Field(default="")
+    smtp_app_password: str = Field(default="")
+    verification_log_group: str = Field(default="/opsflow/retriva-api")
+    verification_log_source: Literal["cloudwatch", "file"] = Field(
+        default="cloudwatch"
+    )
+    verification_log_file: str = Field(default="")
+    verification_window_minutes: int = Field(default=15)
+    verification_poll_interval_seconds: int = Field(default=60)
 
     api_host: str = Field(default="0.0.0.0")
     api_port: int = Field(default=8000)

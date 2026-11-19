@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import Protocol
+import smtplib
+from email.message import EmailMessage
+from typing import Literal, Protocol
 
 import httpx
 from pydantic import BaseModel
@@ -327,3 +329,96 @@ def dispatch_escalation(
         else get_notifiers(summary.get("tenant_id"))
     )
     return [channel.send_escalation(level=level, recipient=recipient, summary=summary) for channel in channels]
+
+
+def send_gmail_event(
+    *,
+    event: Literal["pr_created", "resolved", "regressed"],
+    incident,
+    pr_url: str | None = None,
+    revert_pr_url: str | None = None,
+) -> NotificationResult:
+    """Send a Phase 3 event email through a Gmail App Password.
+
+    Uses only the standard library. Credentials come from SMTP_EMAIL and
+    SMTP_APP_PASSWORD and are never logged.
+    """
+    if not settings.smtp_email or not settings.smtp_app_password:
+        return NotificationResult(
+            channel="gmail",
+            ok=False,
+            detail="SMTP_EMAIL/SMTP_APP_PASSWORD not configured",
+        )
+
+    recipient = settings.manager_email or settings.smtp_to
+    if not recipient:
+        return NotificationResult(channel="gmail", ok=False, detail="manager email missing")
+
+    subject_by_event = {
+        "pr_created": "PR created",
+        "resolved": "Incident resolved",
+        "regressed": "Regression detected",
+    }
+    pr_number = getattr(incident, "pr_number", None)
+    review_url = revert_pr_url or pr_url or getattr(incident, "pr_url", None)
+    review_number = getattr(incident, "revert_pr_number", None) or pr_number
+    error_summary = (
+        f"{getattr(incident, 'error_class', '') or 'unknown'}: "
+        f"{getattr(incident, 'error_message', '') or 'no message'}"
+    )
+    model = getattr(incident, "model_name", None) or settings.ollama_code_model
+    location = (
+        f"{getattr(incident, 'file_path', '') or 'unknown'}:"
+        f"{getattr(incident, 'line_number', '?')}"
+    )
+
+    lines = [
+        "OpsFlow AI notification",
+        "",
+        f"Event: {subject_by_event[event]}",
+        f"Incident: {getattr(incident, 'thread_id', 'unknown')}",
+        f"Service: {getattr(incident, 'service', 'unknown')}",
+        f"Error: {error_summary}",
+        f"Location: {location}",
+        f"Commit: {getattr(incident, 'commit_sha', 'unknown')}",
+        f"AI model: {model}",
+        "Cost: $0.00",
+        "",
+    ]
+    if review_url:
+        lines.extend(
+            [
+                f"Review & Approve PR #{review_number}: {review_url}",
+                "",
+            ]
+        )
+    if revert_pr_url and pr_url:
+        lines.append(f"Original fix PR: {pr_url}")
+    lines.extend(
+        [
+            "This is an automated notification from OpsFlow AI.",
+            "Human review and approval are required. Auto-merge is disabled.",
+        ]
+    )
+
+    message = EmailMessage()
+    message["Subject"] = (
+        f"[OpsFlow] {subject_by_event[event]} — "
+        f"{getattr(incident, 'thread_id', 'incident')}"
+    )
+    message["From"] = settings.smtp_email
+    message["To"] = recipient
+    message.set_content("\n".join(lines))
+
+    try:
+        with smtplib.SMTP(
+            "smtp.gmail.com",
+            587,
+            timeout=settings.notification_timeout_seconds,
+        ) as smtp:
+            smtp.starttls()
+            smtp.login(settings.smtp_email, settings.smtp_app_password)
+            smtp.send_message(message)
+        return NotificationResult(channel="gmail", ok=True, detail="sent")
+    except Exception as exc:
+        return NotificationResult(channel="gmail", ok=False, detail=str(exc))
