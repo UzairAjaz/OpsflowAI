@@ -1,4 +1,4 @@
-"""Add tenant, user, rulebook, chunk, and audit tables for the MediConnect pilot.
+"""Add tenant, user, rulebook, chunk, and audit tables for the Retriva tenant foundation.
 
 Revision ID: 7d3f9a1b2c4e
 Revises: 061f6dbf4e84

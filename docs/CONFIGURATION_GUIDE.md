@@ -97,7 +97,7 @@ interpolates them from the same `.env` file. Keep them consistent with
 WEBHOOK_SECRET=dev-secret-change-me
 WEBHOOK_SIGNATURE_HEADER=X-Signature
 AUTH_DEV_MODE=true
-DEV_TENANT_ID=mediconnect
+DEV_TENANT_ID=retriva
 AUTH_JWT_SECRET=opsflow-dev-jwt-secret-change-me-please
 AUTH_JWT_ALGORITHM=HS256
 AUTH_TOKEN_TTL_MINUTES=60
@@ -168,11 +168,11 @@ ESCALATION_RECIPIENTS=manager,senior_manager,cto
 ### Demo values
 
 ```env
-DEMO_TENANT_ID=mediconnect
-DEMO_TENANT_NAME=MediConnect
-DEMO_SERVICE=mediconnect-backend
+DEMO_TENANT_ID=retriva
+DEMO_TENANT_NAME=Retriva
+DEMO_SERVICE=retriva-api
 DEMO_ERROR_CLASS=OOMKilled
-DEMO_EMAIL=admin@mediconnect.local
+DEMO_EMAIL=admin@retriva.local
 DEMO_APPROVER=demo-cli
 CLI_APPROVER=cli-user
 ```

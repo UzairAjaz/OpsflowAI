@@ -4,7 +4,7 @@ from app.llm import get_structured_llm
 from app.state import Diagnosis
 
 SAMPLE_LOG = """\
-Error: Docker container retriva-backend exited with code 137 (OOM Killed)
+Error: Docker container retriva-api exited with code 137 (OOM Killed)
 kernel: Memory cgroup out of memory: Killed process 4821 (python3)
 container memory limit: 512MiB, peak usage: 1.4GiB
 """

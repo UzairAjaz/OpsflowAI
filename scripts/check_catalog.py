@@ -15,7 +15,7 @@ def main() -> None:
     print("\n=== valid proposal ===")
     good = Remediation(
         remediation_id="increase_memory_limit",
-        params={"container_name": "retriva-backend", "new_memory_limit": "2Gi"},
+        params={"container_name": "retriva-api", "new_memory_limit": "2Gi"},
         rationale="x",
     )
     r = validate_proposal(cat, good)
@@ -23,7 +23,7 @@ def main() -> None:
     spec = cat.get("increase_memory_limit")
     print("argv:", build_command(spec, r.resolved))
     assert r.ok and build_command(spec, r.resolved) == [
-        "docker", "update", "--memory", "2Gi", "retriva-backend",
+        "docker", "update", "--memory", "2Gi", "retriva-api",
     ]
 
     ok_enum = Remediation(remediation_id="restart_service", params={"service_name": "nginx"}, rationale="x")

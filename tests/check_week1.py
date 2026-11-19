@@ -30,7 +30,7 @@ def _preflight(state: OpsFlowState) -> dict:
         "evidence": ["exit code 137", "OOMKilled"],
         "proposed_remediation": Remediation(
             remediation_id="increase_memory_limit",
-            params={"container_name": "retriva-backend", "new_memory_limit": "2Gi"},
+            params={"container_name": "retriva-api", "new_memory_limit": "2Gi"},
             rationale="integration test",
         ),
         "critic_score": 85,

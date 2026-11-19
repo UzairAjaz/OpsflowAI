@@ -25,11 +25,11 @@ def _seed(thread_id: str) -> dict:
     state = new_incident("durable checkpoint test", thread_id)
     state["proposed_remediation"] = Remediation(
         remediation_id="increase_memory_limit",
-        params={"container_name": "retriva-backend", "new_memory_limit": "2Gi"},
+        params={"container_name": "retriva-api", "new_memory_limit": "2Gi"},
         rationale="test",
     )
     state["resolved_params"] = {
-        "container_name": "retriva-backend",
+        "container_name": "retriva-api",
         "new_memory_limit": "2Gi",
     }
     state["diagnosis"] = "OOM killed"

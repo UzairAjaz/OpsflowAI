@@ -1,6 +1,6 @@
 allowlists:
   allowed_services:
-    - retriva-backend
+    - retriva-api
     - nginx
     - postgres
     - redis

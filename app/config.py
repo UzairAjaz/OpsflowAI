@@ -159,16 +159,16 @@ class Settings(BaseSettings):
 
     tenant_api_keys: str = Field(default="")
     auth_dev_mode: bool = Field(default=False)
-    dev_tenant_id: str = Field(default="mediconnect")
+    dev_tenant_id: str = Field(default="retriva")
     auth_jwt_secret: str = Field(default="opsflow-dev-jwt-secret-change-me-please")
     auth_jwt_algorithm: Literal["HS256", "HS384", "HS512"] = Field(default="HS256")
     auth_token_ttl_minutes: int = Field(default=60)
 
-    demo_tenant_id: str = Field(default="mediconnect")
-    demo_tenant_name: str = Field(default="MediConnect")
-    demo_service: str = Field(default="mediconnect-backend")
+    demo_tenant_id: str = Field(default="retriva")
+    demo_tenant_name: str = Field(default="Retriva")
+    demo_service: str = Field(default="retriva-api")
     demo_error_class: str = Field(default="OOMKilled")
-    demo_email: str = Field(default="admin@mediconnect.local")
+    demo_email: str = Field(default="admin@retriva.local")
     demo_approver: str = Field(default="demo-cli")
     cli_approver: str = Field(default="cli-user")
 

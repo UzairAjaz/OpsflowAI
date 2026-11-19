@@ -37,7 +37,7 @@ add GET /debug/boom behind ENABLE_TEST_BUG
 Add to the target service `.env.example` and ECS task definition:
 
 ```env
-SERVICE_NAME=mediconnect-backend
+SERVICE_NAME=retriva-api
 ENVIRONMENT=staging
 GIT_COMMIT_SHA=replace-at-deploy-time
 ENABLE_TEST_BUG=false
@@ -62,7 +62,7 @@ Every application log line must be one JSON object:
   "level": "ERROR",
   "message": "intentional staging test bug",
   "logger": "app.main",
-  "service": "mediconnect-backend",
+  "service": "retriva-api",
   "environment": "staging",
   "commit_sha": "abc123...",
   "trace_id": "req-...",
@@ -211,7 +211,7 @@ that uvicorn does not add a second non-JSON handler for application logs.
    }
    ```
 3. Set `ENABLE_TEST_BUG=true` in staging only.
-4. Confirm the ECS `awslogs` driver writes to `/ecs/mediconnect-backend`.
+4. Confirm the ECS `awslogs` driver writes to `/ecs/retriva-api`.
 5. Deploy and wait for ECS service stability.
 
 ## 8. Validation
@@ -219,7 +219,7 @@ that uvicorn does not add a second non-JSON handler for application logs.
 Local:
 
 ```powershell
-$env:SERVICE_NAME="mediconnect-backend"
+$env:SERVICE_NAME="retriva-api"
 $env:ENVIRONMENT="staging"
 $env:GIT_COMMIT_SHA="local-test"
 $env:ENABLE_TEST_BUG="true"
@@ -235,7 +235,7 @@ Staging:
 ```bash
 curl -i "https://<staging-host>/debug/boom"
 aws logs filter-log-events \
-  --log-group-name /ecs/mediconnect-backend \
+  --log-group-name /ecs/retriva-api \
   --filter-pattern '{ $.level = "ERROR" }' \
   --limit 5
 ```
@@ -263,5 +263,5 @@ line, and stack trace.
   not the application error records.
 - **Secrets/PII:** redact before logging; never log headers or request bodies.
 - **Test bug in production:** `ENABLE_TEST_BUG` must be false outside staging.
-- **Missing subscription filter:** rerun `deploy/aws/04-lambda.sh` after the log
-  group exists.
+- **Missing subscription filter:** rerun `deploy/aws-zero-cost/03-lambda.sh`
+  after the log group exists.

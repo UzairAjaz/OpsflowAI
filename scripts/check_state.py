@@ -55,7 +55,7 @@ def main() -> None:
     print(
         Remediation(
             remediation_id="increase_memory_limit",
-            params={"service_name": "retriva-backend", "limit": "1g"},
+            params={"service_name": "retriva-api", "limit": "1g"},
             rationale="Matches OOM runbook; reversible.",
         ).model_dump_json(indent=2)
     )

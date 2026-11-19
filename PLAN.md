@@ -217,7 +217,8 @@ or API Gateway is allowed. Therefore:
 5. Lambda is 128 MB, 30 s, reserved concurrency 1.
 6. SQS uses long polling and batch size 10.
 7. No resource outside the allowed list is created.
-8. The old paid-stack scripts under `deploy/aws/` are **not** to be run as-is.
+8. The old paid-stack scripts under `deploy/aws/` were removed; only
+   `deploy/aws-zero-cost/` is active.
 9. Any proposal to add a paid service requires explicit approval from the card owner and project owner.
 
 ---
@@ -320,12 +321,11 @@ the `api_server.py` fix.
 
 ---
 
-## 9. Superseded documents
+## 9. Removed legacy artifacts
 
-`docs/PHASE_3_GITOPS_IMPLEMENTATION_PLAN.md` was written for an ECS/RDS/ALB
-architecture. It is **superseded by this plan** for AWS deployment and must not
-be used to provision infrastructure without rewriting its cost model.
+The cleanup pass removed the superseded ECS/RDS/ALB plan, the paid-stack
+`deploy/aws/` scripts, the legacy pilot docs, and unused validation scripts.
+They remain available only in Git history.
 
-`deploy/aws/` contains scripts for the old paid stack. Do not run the network,
-RDS, ElastiCache, ECS, ALB, EventBridge, Secrets Manager, or teardown scripts in
-zero-cost mode.
+The active deployment path is `deploy/aws-zero-cost/`: CloudWatch Logs, Lambda,
+and SQS only. No banned service may be provisioned in zero-cost mode.

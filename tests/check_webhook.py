@@ -11,7 +11,7 @@ from worker.queue import get_queue
 
 ALERT = {
     "source": "cloudwatch",
-    "service": "retriva-backend",
+    "service": "retriva-api",
     "error_class": "OOMKilled",
     "severity_hint": "critical",
     "raw_log": "container exited with code 137",

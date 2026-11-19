@@ -217,7 +217,8 @@ integrations/           AWS, GitHub, notifications, storage
 ingestion/              Alert schemas and normalization
 db/                     SQLAlchemy models and sessions
 migrations/             Alembic migrations
-deploy/aws/             Legacy paid-stack scripts; do not run as-is
+deploy/aws-zero-cost/   Active CloudWatch/Lambda/SQS provisioning scripts
+deploy/k8s/             Canary test manifests
 docs/                   Configuration, runbooks, and phase plans
 tests/                  Verification scripts
 PLAN.md                 Master plan and zero-cost architecture
@@ -238,5 +239,5 @@ PLAN.md                 Master plan and zero-cost architecture
 
 The original infrastructure-remediation agent under `app/`, `api/`, and
 `worker/` remains in the repository, but it is not the critical path for the
-zero-cost GitOps rollout. The old `docs/PHASE_3_GITOPS_IMPLEMENTATION_PLAN.md`
-describes an ECS/RDS/ALB architecture that is superseded by `PLAN.md`.
+zero-cost GitOps rollout. The superseded paid-stack plans and scripts were
+removed during the cleanup pass; `PLAN.md` is the authoritative architecture.

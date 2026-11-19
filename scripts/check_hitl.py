@@ -18,10 +18,10 @@ def seed(thread_id: str) -> dict:
     st = new_incident("test", thread_id)
     st["proposed_remediation"] = Remediation(
         remediation_id="increase_memory_limit",
-        params={"container_name": "retriva-backend", "new_memory_limit": "2Gi"},
+        params={"container_name": "retriva-api", "new_memory_limit": "2Gi"},
         rationale="test",
     )
-    st["resolved_params"] = {"container_name": "retriva-backend", "new_memory_limit": "2Gi"}
+    st["resolved_params"] = {"container_name": "retriva-api", "new_memory_limit": "2Gi"}
     st["diagnosis"] = "OOM killed"
     st["root_cause"] = "memory limit too low"
     st["severity"] = "high"

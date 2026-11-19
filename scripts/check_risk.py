@@ -20,7 +20,7 @@ def main() -> None:
     s = run(
         Remediation(
             remediation_id="increase_memory_limit",
-            params={"container_name": "retriva-backend", "new_memory_limit": "2Gi"},
+            params={"container_name": "retriva-api", "new_memory_limit": "2Gi"},
             rationale="x",
         )
     )
